@@ -308,10 +308,12 @@ describe('NetworkServiceRepository', () => {
         tags: ['updated', 'modified']
       };
 
+      // Add a small delay to ensure timestamps differ
+      await new Promise(resolve => setTimeout(resolve, 1));
       const result = await repository.update(serviceId, updates);
 
       expect(result).toMatchObject(updates);
-      expect(result.updatedAt.getTime()).toBeGreaterThanOrEqual(result.createdAt.getTime());
+      expect(result.updatedAt.getTime()).toBeGreaterThan(result.createdAt.getTime());
     });
 
     it('should update individual fields', async () => {
@@ -511,5 +513,7 @@ describe('NetworkServiceRepository', () => {
       expect(result!.externalPorts).toEqual([80, 443]);
       expect(result!.tags).toEqual(['tag1', 'tag2', 'tag3']);
     });
+
+
   });
 });

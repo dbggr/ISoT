@@ -189,14 +189,21 @@ export class SQLiteNetworkServiceRepository implements NetworkServiceRepository 
         }
 
         if (filters.cidrRange) {
-          // For CIDR range filtering, we'll do a simple string match for now
-          // In a production system, you might want to use IP address arithmetic
+          // CIDR range filtering using string matching - LIMITATIONS:
+          // - This is a simplified implementation for basic pattern matching
+          // - Does not perform proper IP address arithmetic or subnet calculations
+          // - May produce false positives (e.g., "10.0.0" matches "110.0.0.1/24")
+          // - For production use, consider implementing proper CIDR validation using
+          //   libraries like 'ip-address' or 'netmask' for accurate subnet matching
           conditions.push('cidr LIKE ?');
           params.push(`%${filters.cidrRange}%`);
         }
 
         if (filters.tags && filters.tags.length > 0) {
           // For tags, we need to check if any of the provided tags exist in the JSON array
+          // NOTE: This implementation uses parameterized queries to prevent SQL injection,
+          // but tag values containing LIKE wildcards (% or _) may produce unexpected results.
+          // For production use, consider implementing proper tag escaping or using JSON functions.
           const tagConditions = filters.tags.map(() => 'tags LIKE ?');
           conditions.push(`(${tagConditions.join(' OR ')})`);
           filters.tags.forEach(tag => {
