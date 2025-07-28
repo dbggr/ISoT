@@ -5,23 +5,23 @@ export class DatabaseError extends Error {
   }
 }
 
-export class ValidationError extends Error {
-  constructor(message: string, public readonly field?: string) {
-    super(message);
+export class ValidationError extends DatabaseError {
+  constructor(message: string, public readonly field?: string, originalError?: Error) {
+    super(message, originalError);
     this.name = 'ValidationError';
   }
 }
 
-export class NotFoundError extends Error {
-  constructor(resource: string, id: string) {
-    super(`${resource} with id '${id}' not found`);
+export class NotFoundError extends DatabaseError {
+  constructor(resource: string, id: string, originalError?: Error) {
+    super(`${resource} with id '${id}' not found`, originalError);
     this.name = 'NotFoundError';
   }
 }
 
-export class ConflictError extends Error {
-  constructor(message: string) {
-    super(message);
+export class ConflictError extends DatabaseError {
+  constructor(message: string, originalError?: Error) {
+    super(message, originalError);
     this.name = 'ConflictError';
   }
 }
