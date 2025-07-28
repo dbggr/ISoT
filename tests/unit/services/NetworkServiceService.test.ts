@@ -11,7 +11,7 @@ import type {
   UpdateNetworkServiceDto, 
   ServiceFilters 
 } from '../../../api/models/NetworkService';
-import type { Group } from '../../../api/models/Group';
+import type { Group, CreateGroupDto, UpdateGroupDto } from '../../../api/models/Group';
 import { ValidationError, NotFoundError, ConflictError } from '../../../api/utils/errors';
 
 // Mock NetworkServiceRepository
@@ -115,7 +115,7 @@ class MockNetworkServiceRepository implements NetworkServiceRepository {
 class MockGroupRepository implements GroupRepository {
   private groups: Group[] = [];
 
-  async create(group: any): Promise<Group> {
+  async create(group: CreateGroupDto): Promise<Group> {
     throw new Error('Not implemented in mock');
   }
 
@@ -127,7 +127,7 @@ class MockGroupRepository implements GroupRepository {
     return [...this.groups];
   }
 
-  async update(id: string, updates: any): Promise<Group> {
+  async update(id: string, updates: UpdateGroupDto): Promise<Group> {
     throw new Error('Not implemented in mock');
   }
 
