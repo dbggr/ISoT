@@ -26,7 +26,14 @@ interface GroupRow {
 }
 
 export class SQLiteGroupRepository implements GroupRepository {
-  private db = getDatabase();
+  private _db: ReturnType<typeof getDatabase> | null = null;
+
+  private get db() {
+    if (!this._db) {
+      this._db = getDatabase();
+    }
+    return this._db;
+  }
 
   private mapRowToGroup(row: GroupRow): Group {
     return {
@@ -103,7 +110,7 @@ export class SQLiteGroupRepository implements GroupRepository {
 
     // Build dynamic update query
     const updateFields: string[] = [];
-    const values: any[] = [];
+    const values: (string | null)[] = [];
 
     if (updates.name !== undefined) {
       updateFields.push('name = ?');

@@ -112,16 +112,24 @@ describe('GroupRepository', () => {
     });
 
     it('should handle database errors gracefully', async () => {
-      // Close database to simulate error
+      // Create a repository with an invalid database path to simulate error
+      const originalPath = process.env.DATABASE_PATH;
+      process.env.DATABASE_PATH = '/invalid/path/that/does/not/exist.db';
+      
+      // Close existing database connection
       closeDatabase();
-
+      
+      const newRepository = new SQLiteGroupRepository();
       const groupData: CreateGroupDto = {
         name: 'Test Group'
       };
 
-      await expect(repository.create(groupData))
+      await expect(newRepository.create(groupData))
         .rejects
         .toThrow(DatabaseError);
+        
+      // Restore original path
+      process.env.DATABASE_PATH = originalPath;
     });
   });
 
@@ -148,11 +156,21 @@ describe('GroupRepository', () => {
     });
 
     it('should handle database errors gracefully', async () => {
+      // Create a repository with an invalid database path to simulate error
+      const originalPath = process.env.DATABASE_PATH;
+      process.env.DATABASE_PATH = '/invalid/path/that/does/not/exist.db';
+      
+      // Close existing database connection
       closeDatabase();
+      
+      const newRepository = new SQLiteGroupRepository();
 
-      await expect(repository.findById('some-id'))
+      await expect(newRepository.findById('some-id'))
         .rejects
         .toThrow(DatabaseError);
+        
+      // Restore original path
+      process.env.DATABASE_PATH = originalPath;
     });
   });
 
@@ -176,11 +194,21 @@ describe('GroupRepository', () => {
     });
 
     it('should handle database errors gracefully', async () => {
+      // Create a repository with an invalid database path to simulate error
+      const originalPath = process.env.DATABASE_PATH;
+      process.env.DATABASE_PATH = '/invalid/path/that/does/not/exist.db';
+      
+      // Close existing database connection
       closeDatabase();
+      
+      const newRepository = new SQLiteGroupRepository();
 
-      await expect(repository.findAll())
+      await expect(newRepository.findAll())
         .rejects
         .toThrow(DatabaseError);
+        
+      // Restore original path
+      process.env.DATABASE_PATH = originalPath;
     });
   });
 
@@ -336,11 +364,21 @@ describe('GroupRepository', () => {
     });
 
     it('should handle database errors gracefully', async () => {
+      // Create a repository with an invalid database path to simulate error
+      const originalPath = process.env.DATABASE_PATH;
+      process.env.DATABASE_PATH = '/invalid/path/that/does/not/exist.db';
+      
+      // Close existing database connection
       closeDatabase();
+      
+      const newRepository = new SQLiteGroupRepository();
 
-      await expect(repository.findByName('Test Group'))
+      await expect(newRepository.findByName('Test Group'))
         .rejects
         .toThrow(DatabaseError);
+        
+      // Restore original path
+      process.env.DATABASE_PATH = originalPath;
     });
   });
 });
