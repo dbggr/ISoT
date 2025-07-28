@@ -1,0 +1,21 @@
+import { databaseManager } from '../api/database';
+
+async function seedDatabase() {
+  try {
+    console.log('Seeding database with default data...');
+    
+    // Initialize database first if needed
+    await databaseManager.initializeDatabase();
+    
+    // Seed default data
+    databaseManager.seedDefaultData();
+    
+    console.log('Database seeding completed successfully');
+    process.exit(0);
+  } catch (error) {
+    console.error('Database seeding failed:', error instanceof Error ? error.message : 'Unknown error');
+    process.exit(1);
+  }
+}
+
+seedDatabase();

@@ -9,8 +9,9 @@
     "lint": "next lint",
     "test": "jest",
     "test:watch": "jest --watch",
-    "db:init": "node scripts/init-db.js",
-    "db:seed": "node scripts/seed-db.js"
+    "db:init": "ts-node --project scripts/tsconfig.json scripts/init-db.ts",
+    "db:seed": "ts-node --project scripts/tsconfig.json scripts/seed-db.ts",
+    "db:test": "ts-node --project scripts/tsconfig.json scripts/test-db.ts"
   },
   "dependencies": {
     "better-sqlite3": "^9.0.0",
@@ -31,6 +32,7 @@
     "jest": "^29.5.0",
     "supertest": "^6.3.0",
     "ts-jest": "^29.1.0",
+    "ts-node": "^10.9.2",
     "typescript": "^5"
   }
 }
