@@ -53,16 +53,15 @@ export class SQLiteGroupRepository implements GroupRepository {
       const stmt = this.db.prepare(`
         INSERT INTO groups (id, name, description, created_at, updated_at)
         VALUES (?, ?, ?, ?, ?)
+        RETURNING id, name, description, created_at, updated_at
       `);
 
-      stmt.run(id, group.name, group.description || null, now, now);
-
-      const createdGroup = await this.findById(id);
-      if (!createdGroup) {
+      const row = stmt.get(id, group.name, group.description || null, now, now) as GroupRow | undefined;
+      if (!row) {
         throw new DatabaseError('Failed to create group');
       }
 
-      return createdGroup;
+      return this.mapRowToGroup(row);
     } catch (error) {
       if (error instanceof Error && error.message.includes('UNIQUE constraint failed')) {
         throw new ConflictError(`Group with name '${group.name}' already exists`);
@@ -136,20 +135,16 @@ export class SQLiteGroupRepository implements GroupRepository {
         UPDATE groups
         SET ${updateFields.join(', ')}
         WHERE id = ?
+        RETURNING id, name, description, created_at, updated_at
       `);
 
-      const result = stmt.run(...values);
+      const updatedRow = stmt.get(...values) as GroupRow | undefined;
       
-      if (result.changes === 0) {
+      if (!updatedRow) {
         throw new NotFoundError('Group', id);
       }
 
-      const updatedGroup = await this.findById(id);
-      if (!updatedGroup) {
-        throw new DatabaseError('Failed to retrieve updated group');
-      }
-
-      return updatedGroup;
+      return this.mapRowToGroup(updatedRow);
     } catch (error) {
       if (error instanceof NotFoundError) {
         throw error;
