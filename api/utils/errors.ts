@@ -40,7 +40,7 @@ export function handleDatabaseError(error: Error): DatabaseError {
   }
   
   if (isForeignKeyConstraintError(error)) {
-    return new ValidationError('Referenced resource does not exist');
+    return new ConflictError('Cannot perform operation due to foreign key constraint');
   }
   
   return new DatabaseError('Database operation failed', error);
