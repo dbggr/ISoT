@@ -60,7 +60,7 @@ class Logger {
         name: error.name,
         message: error.message,
         stack: error.stack,
-        ...(error.cause && { cause: this.serializeError(error.cause) })
+        ...((error as any).cause && { cause: this.serializeError((error as any).cause) })
       };
     }
     return error;
@@ -161,5 +161,4 @@ class Logger {
 // Export singleton logger instance
 export const logger = new Logger();
 
-// Export types for external use
-export type { LogEntry };
+// LogEntry interface is already exported above

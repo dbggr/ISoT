@@ -40,7 +40,7 @@ export class DatabaseManager {
       console.log('Initializing database schema...');
       
       // Read and execute the main schema
-      const schemaPath = path.join(__dirname, 'schema.sql');
+      const schemaPath = path.join(process.cwd(), 'api', 'database', 'schema.sql');
       const schema = fs.readFileSync(schemaPath, 'utf8');
       
       this.db.exec(schema);
@@ -49,7 +49,7 @@ export class DatabaseManager {
       await this.runMigrations();
       
       // Seed default data if needed
-      this.seedDefaultData();
+      await this.seedDefaultData();
       
       this.initialized = true;
       console.log('Database initialized successfully');
@@ -66,7 +66,7 @@ export class DatabaseManager {
 
   public async runMigrations(): Promise<void> {
     try {
-      const migrationsDir = path.join(__dirname, 'migrations');
+      const migrationsDir = path.join(process.cwd(), 'api', 'database', 'migrations');
       
       // Create migrations directory if it doesn't exist
       if (!fs.existsSync(migrationsDir)) {
@@ -106,7 +106,7 @@ export class DatabaseManager {
 
   private async applyMigration(version: number, filename: string): Promise<void> {
     try {
-      const migrationPath = path.join(__dirname, 'migrations', filename);
+      const migrationPath = path.join(process.cwd(), 'api', 'database', 'migrations', filename);
       const migrationSql = fs.readFileSync(migrationPath, 'utf8');
       
       // Execute migration in a transaction
@@ -126,7 +126,7 @@ export class DatabaseManager {
     }
   }
 
-  public seedDefaultData(): void {
+  public async seedDefaultData(): Promise<void> {
     try {
       // Check if groups already exist
       const stmt = this.db.prepare('SELECT COUNT(*) as count FROM groups');
@@ -135,23 +135,25 @@ export class DatabaseManager {
       if (result.count === 0) {
         // Insert default groups
         const insertGroup = this.db.prepare(`
-          INSERT INTO groups (id, name, description) 
+          INSERT OR IGNORE INTO groups (id, name, description) 
           VALUES (?, ?, ?)
         `);
         
+        const { generateUUID } = await import('../utils/uuid');
+        
         const defaultGroups = [
           {
-            id: 'storage',
+            id: generateUUID(),
             name: 'Storage',
             description: 'Storage and data persistence services'
           },
           {
-            id: 'security',
+            id: generateUUID(),
             name: 'Security',
             description: 'Security and authentication services'
           },
           {
-            id: 'data_services',
+            id: generateUUID(),
             name: 'Data Services',
             description: 'Data processing and analytics services'
           }

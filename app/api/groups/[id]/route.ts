@@ -7,6 +7,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { DefaultGroupService } from '../../../../api/services/GroupService';
 import { withErrorHandler } from '../../../../api/middleware/error-handler';
 import { validateUpdateGroup } from '../../../../api/middleware/validation';
+import { applyCorsHeaders } from '../../../../api/middleware/cors';
 import { logger } from '../../../../api/utils/logger';
 
 const groupService = new DefaultGroupService();
@@ -24,7 +25,8 @@ export const GET = withErrorHandler(async (
   const group = await groupService.getGroup(id);
   
   logger.apiResponse('GET', `/api/groups/${id}`, 200);
-  return NextResponse.json(group, { status: 200 });
+  const response = NextResponse.json(group, { status: 200 });
+  return applyCorsHeaders(response, request);
 }, 'GET /api/groups/[id]');
 
 /**
@@ -40,13 +42,14 @@ export const PUT = withErrorHandler(async (
   // Validate request body
   const validation = await validateUpdateGroup(request);
   if (!validation.isValid) {
-    return validation.response;
+    return applyCorsHeaders(validation.response, request);
   }
   
   const group = await groupService.updateGroup(id, validation.data);
   
   logger.apiResponse('PUT', `/api/groups/${id}`, 200);
-  return NextResponse.json(group, { status: 200 });
+  const response = NextResponse.json(group, { status: 200 });
+  return applyCorsHeaders(response, request);
 }, 'PUT /api/groups/[id]');
 
 /**
@@ -62,8 +65,17 @@ export const DELETE = withErrorHandler(async (
   await groupService.deleteGroup(id);
   
   logger.apiResponse('DELETE', `/api/groups/${id}`, 200);
-  return NextResponse.json(
+  const response = NextResponse.json(
     { message: 'Group deleted successfully' },
     { status: 200 }
   );
+  return applyCorsHeaders(response, request);
 }, 'DELETE /api/groups/[id]');
+
+/**
+ * Handle preflight OPTIONS request
+ */
+export async function OPTIONS(request: NextRequest) {
+  const response = new NextResponse(null, { status: 200 });
+  return applyCorsHeaders(response, request);
+}

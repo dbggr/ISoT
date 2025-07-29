@@ -12,4 +12,8 @@ module.exports = {
   ],
   moduleFileExtensions: ['ts', 'js', 'json'],
   setupFilesAfterEnv: [],
+  // Force tests to run serially to avoid database conflicts
+  maxWorkers: 1,
+  // Increase timeout for database operations
+  testTimeout: 10000,
 };

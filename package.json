@@ -9,10 +9,22 @@
     "lint": "next lint",
     "test": "jest",
     "test:watch": "jest --watch",
+    "test:integration": "jest --testPathPattern=integration",
+    "test:unit": "jest --testPathPattern=unit",
+    "test:coverage": "jest --coverage",
     "db:init": "ts-node --project scripts/tsconfig.json scripts/init-db.ts",
     "db:seed": "ts-node --project scripts/tsconfig.json scripts/seed-db.ts",
     "db:test": "ts-node --project scripts/tsconfig.json scripts/test-db.ts",
-    "db:test-startup": "ts-node --project scripts/tsconfig.json scripts/test-startup-init.ts"
+    "db:test-startup": "ts-node --project scripts/tsconfig.json scripts/test-startup-init.ts",
+    "db:reset": "rm -f data/network-source-truth.db && npm run db:init && npm run db:seed",
+    "db:reset-test": "rm -f data/network-source-truth-test.db",
+    "api:test": "curl -s http://localhost:3000/api/health | jq .",
+    "api:docs": "echo 'API Documentation available at: docs/api-documentation.md'",
+    "setup": "npm install && npm run db:init && npm run db:seed",
+    "clean": "rm -rf .next && rm -rf node_modules/.cache && npm run db:reset",
+    "verify": "npm run lint && npm run test && npm run build",
+    "verify:requirements": "ts-node --project scripts/tsconfig.json scripts/verify-requirements.ts",
+    "verify:full": "npm run verify && npm run verify:requirements"
   },
   "dependencies": {
     "better-sqlite3": "^9.0.0",

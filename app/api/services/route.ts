@@ -7,6 +7,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { DefaultNetworkServiceService } from '../../../api/services/NetworkServiceService';
 import { withErrorHandler } from '../../../api/middleware/error-handler';
 import { validateCreateNetworkService, validateServiceFilters } from '../../../api/middleware/validation';
+import { applyCorsHeaders } from '../../../api/middleware/cors';
 import { logger } from '../../../api/utils/logger';
 
 const networkServiceService = new DefaultNetworkServiceService();
@@ -27,7 +28,7 @@ export const GET = withErrorHandler(async (request: NextRequest) => {
   // Validate query parameters
   const validation = validateServiceFilters(request);
   if (!validation.isValid) {
-    return validation.response;
+    return applyCorsHeaders(validation.response, request);
   }
   
   const services = await networkServiceService.getAllServices(validation.data);
@@ -36,7 +37,8 @@ export const GET = withErrorHandler(async (request: NextRequest) => {
     count: services.length,
     filters: validation.data 
   });
-  return NextResponse.json(services, { status: 200 });
+  const response = NextResponse.json(services, { status: 200 });
+  return applyCorsHeaders(response, request);
 }, 'GET /api/services');
 
 /**
@@ -48,11 +50,20 @@ export const POST = withErrorHandler(async (request: NextRequest) => {
   // Validate request body
   const validation = await validateCreateNetworkService(request);
   if (!validation.isValid) {
-    return validation.response;
+    return applyCorsHeaders(validation.response, request);
   }
   
   const service = await networkServiceService.createService(validation.data);
   
   logger.apiResponse('POST', '/api/services', 201, { serviceId: service.id });
-  return NextResponse.json(service, { status: 201 });
+  const response = NextResponse.json(service, { status: 201 });
+  return applyCorsHeaders(response, request);
 }, 'POST /api/services');
+
+/**
+ * Handle preflight OPTIONS request
+ */
+export async function OPTIONS(request: NextRequest) {
+  const response = new NextResponse(null, { status: 200 });
+  return applyCorsHeaders(response, request);
+}

@@ -3,10 +3,11 @@
  * Standardizes error responses across the API
  */
 
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { ValidationError, NotFoundError, ConflictError, DatabaseError } from '../utils/errors';
 import { ZodError } from 'zod';
 import { logger } from '../utils/logger';
+import { applyCorsHeaders } from './cors';
 
 /**
  * Standardized API error response format
@@ -37,7 +38,8 @@ export function createErrorResponse(
   error: string,
   message: string,
   statusCode: number,
-  details?: any
+  details?: any,
+  request?: NextRequest
 ): NextResponse<ApiErrorResponse> {
   const errorResponse: ApiErrorResponse = {
     error,
@@ -46,13 +48,20 @@ export function createErrorResponse(
     ...(details && { details })
   };
 
-  return NextResponse.json(errorResponse, { status: statusCode });
+  const response = NextResponse.json(errorResponse, { status: statusCode });
+  
+  // Apply CORS headers if request is provided
+  if (request) {
+    return applyCorsHeaders(response, request) as NextResponse<ApiErrorResponse>;
+  }
+  
+  return response;
 }
 
 /**
  * Handles different types of errors and returns appropriate responses
  */
-export function handleApiError(error: unknown, context?: string): NextResponse<ApiErrorResponse> {
+export function handleApiError(error: unknown, context?: string, request?: NextRequest): NextResponse<ApiErrorResponse> {
   // Log the error for debugging
   logger.error('API Error', { error, context });
 
@@ -68,7 +77,8 @@ export function handleApiError(error: unknown, context?: string): NextResponse<A
       ERROR_CODES.VALIDATION_ERROR,
       'Validation failed',
       400,
-      details
+      details,
+      request
     );
   }
 
@@ -78,7 +88,8 @@ export function handleApiError(error: unknown, context?: string): NextResponse<A
       ERROR_CODES.VALIDATION_ERROR,
       error.message,
       400,
-      error.field ? { field: error.field } : undefined
+      error.field ? { field: error.field } : undefined,
+      request
     );
   }
 
@@ -87,7 +98,9 @@ export function handleApiError(error: unknown, context?: string): NextResponse<A
     return createErrorResponse(
       ERROR_CODES.NOT_FOUND,
       error.message,
-      404
+      404,
+      undefined,
+      request
     );
   }
 
@@ -96,7 +109,9 @@ export function handleApiError(error: unknown, context?: string): NextResponse<A
     return createErrorResponse(
       ERROR_CODES.CONFLICT,
       error.message,
-      409
+      409,
+      undefined,
+      request
     );
   }
 
@@ -105,7 +120,9 @@ export function handleApiError(error: unknown, context?: string): NextResponse<A
     return createErrorResponse(
       ERROR_CODES.DATABASE_ERROR,
       'Database operation failed',
-      500
+      500,
+      undefined,
+      request
     );
   }
 
@@ -114,7 +131,9 @@ export function handleApiError(error: unknown, context?: string): NextResponse<A
     return createErrorResponse(
       ERROR_CODES.INTERNAL_SERVER_ERROR,
       'An unexpected error occurred',
-      500
+      500,
+      undefined,
+      request
     );
   }
 
@@ -122,7 +141,9 @@ export function handleApiError(error: unknown, context?: string): NextResponse<A
   return createErrorResponse(
     ERROR_CODES.INTERNAL_SERVER_ERROR,
     'An unknown error occurred',
-    500
+    500,
+    undefined,
+    request
   );
 }
 
@@ -142,7 +163,9 @@ export function withErrorHandler<T extends any[]>(
       
       return await handler(...args);
     } catch (error) {
-      return handleApiError(error, context);
+      // Extract request object from args if available (first argument is typically NextRequest)
+      const request = args.length > 0 && args[0] instanceof Request ? args[0] as NextRequest : undefined;
+      return handleApiError(error, context, request);
     }
   };
 }
