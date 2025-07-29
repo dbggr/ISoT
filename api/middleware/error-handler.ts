@@ -3,7 +3,7 @@
  * Standardizes error responses across the API
  */
 
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { ValidationError, NotFoundError, ConflictError, DatabaseError } from '../utils/errors';
 import { ZodError } from 'zod';
 import { logger } from '../utils/logger';

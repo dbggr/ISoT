@@ -17,15 +17,3 @@ export async function initializeOnStartup(): Promise<void> {
     throw error;
   }
 }
-
-/**
- * Middleware function to ensure database is initialized before handling requests
- */
-export async function ensureDatabaseInitialized(): Promise<void> {
-  try {
-    await databaseManager.ensureInitialized();
-  } catch (error) {
-    console.error('Database initialization check failed:', error instanceof Error ? error.message : 'Unknown error');
-    throw error;
-  }
-}
