@@ -1,37 +1,17 @@
 /**
  * Services API controller
  * Handles HTTP requests for network service management endpoints
+ * 
+ * Note: This controller is now implemented as Next.js API routes:
+ * - GET /api/services - app/api/services/route.ts
+ * - POST /api/services - app/api/services/route.ts
+ * - GET /api/services/[id] - app/api/services/[id]/route.ts
+ * - PUT /api/services/[id] - app/api/services/[id]/route.ts
+ * - DELETE /api/services/[id] - app/api/services/[id]/route.ts
+ * - GET /api/groups/[id]/services - app/api/groups/[id]/services/route.ts
  */
 
-// Placeholder - will be implemented in task 9
 export const servicesController = {
-  // GET /api/services
-  getAllServices: () => {
-    throw new Error('Not implemented');
-  },
-
-  // GET /api/services/[id]
-  getServiceById: () => {
-    throw new Error('Not implemented');
-  },
-
-  // GET /api/groups/[id]/services
-  getServicesByGroup: () => {
-    throw new Error('Not implemented');
-  },
-
-  // POST /api/services
-  createService: () => {
-    throw new Error('Not implemented');
-  },
-
-  // PUT /api/services/[id]
-  updateService: () => {
-    throw new Error('Not implemented');
-  },
-
-  // DELETE /api/services/[id]
-  deleteService: () => {
-    throw new Error('Not implemented');
-  }
+  // Implementation moved to Next.js API routes
+  // This file is kept for reference and potential future use
 };

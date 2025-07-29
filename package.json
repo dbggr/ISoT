@@ -11,7 +11,8 @@
     "test:watch": "jest --watch",
     "db:init": "ts-node --project scripts/tsconfig.json scripts/init-db.ts",
     "db:seed": "ts-node --project scripts/tsconfig.json scripts/seed-db.ts",
-    "db:test": "ts-node --project scripts/tsconfig.json scripts/test-db.ts"
+    "db:test": "ts-node --project scripts/tsconfig.json scripts/test-db.ts",
+    "db:test-startup": "ts-node --project scripts/tsconfig.json scripts/test-startup-init.ts"
   },
   "dependencies": {
     "better-sqlite3": "^9.0.0",

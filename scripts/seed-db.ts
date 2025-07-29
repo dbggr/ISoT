@@ -4,11 +4,8 @@ async function seedDatabase() {
   try {
     console.log('Seeding database with default data...');
     
-    // Initialize database first if needed
+    // Initialize database first if needed (this will also seed default data)
     await databaseManager.initializeDatabase();
-    
-    // Seed default data
-    databaseManager.seedDefaultData();
     
     console.log('Database seeding completed successfully');
     process.exit(0);

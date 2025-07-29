@@ -1,32 +1,39 @@
 /**
  * Groups API controller
  * Handles HTTP requests for group management endpoints
+ * 
+ * Note: This controller is now implemented using Next.js App Router API routes
+ * in app/api/groups/route.ts and app/api/groups/[id]/route.ts
  */
 
-// Placeholder - will be implemented in task 8
+import { DefaultGroupService } from '../services/GroupService';
+import { ValidationError, NotFoundError, ConflictError } from '../utils/errors';
+
+const groupService = new DefaultGroupService();
+
 export const groupsController = {
   // GET /api/groups
-  getAllGroups: () => {
-    throw new Error('Not implemented');
+  getAllGroups: async () => {
+    return await groupService.getAllGroups();
   },
 
   // GET /api/groups/[id]
-  getGroupById: () => {
-    throw new Error('Not implemented');
+  getGroupById: async (id: string) => {
+    return await groupService.getGroup(id);
   },
 
   // POST /api/groups
-  createGroup: () => {
-    throw new Error('Not implemented');
+  createGroup: async (data: any) => {
+    return await groupService.createGroup(data);
   },
 
   // PUT /api/groups/[id]
-  updateGroup: () => {
-    throw new Error('Not implemented');
+  updateGroup: async (id: string, data: any) => {
+    return await groupService.updateGroup(id, data);
   },
 
   // DELETE /api/groups/[id]
-  deleteGroup: () => {
-    throw new Error('Not implemented');
+  deleteGroup: async (id: string) => {
+    await groupService.deleteGroup(id);
   }
 };

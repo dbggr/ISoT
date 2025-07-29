@@ -12,13 +12,40 @@ export interface DatabaseConfig {
   verbose?: (message?: any, ...additionalArgs: any[]) => void;
 }
 
+/**
+ * Get database file path based on environment configuration
+ */
+function getDatabasePath(): string {
+  // Check for explicit DATABASE_PATH environment variable
+  if (process.env.DATABASE_PATH) {
+    return process.env.DATABASE_PATH;
+  }
+
+  // Environment-based defaults
+  const environment = process.env.NODE_ENV || 'development';
+  const baseDir = process.cwd();
+  
+  switch (environment) {
+    case 'test':
+      return path.join(baseDir, 'data', 'network-source-truth-test.db');
+    case 'production':
+      return path.join(baseDir, 'data', 'network-source-truth.db');
+    case 'development':
+    default:
+      return path.join(baseDir, 'data', 'network-source-truth.db');
+  }
+}
+
 export function getDatabase(config?: Partial<DatabaseConfig>): Database.Database {
   if (db) {
     return db;
   }
 
+  // Get database path from environment with fallback
+  const databasePath = getDatabasePath();
+  
   const defaultConfig: DatabaseConfig = {
-    filename: process.env.DATABASE_PATH || path.join(process.cwd(), 'data', 'network-source-truth.db'),
+    filename: databasePath,
     readonly: false,
     fileMustExist: false,
     timeout: 5000,
