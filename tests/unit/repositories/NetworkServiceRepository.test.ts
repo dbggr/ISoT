@@ -309,7 +309,7 @@ describe('NetworkServiceRepository', () => {
       };
 
       // Add a small delay to ensure timestamps differ
-      await new Promise(resolve => setTimeout(resolve, 1));
+      await new Promise(resolve => setTimeout(resolve, 10));
       const result = await repository.update(serviceId, updates);
 
       expect(result).toMatchObject(updates);

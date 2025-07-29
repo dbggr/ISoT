@@ -11,6 +11,7 @@ export interface Migration {
 
 export class DatabaseManager {
   private db = getDatabase();
+  private initialized = false;
 
   constructor() {
     this.initializeMigrationTable();
@@ -31,7 +32,13 @@ export class DatabaseManager {
   }
 
   public async initializeDatabase(): Promise<void> {
+    if (this.initialized) {
+      return;
+    }
+
     try {
+      console.log('Initializing database schema...');
+      
       // Read and execute the main schema
       const schemaPath = path.join(__dirname, 'schema.sql');
       const schema = fs.readFileSync(schemaPath, 'utf8');
@@ -41,9 +48,19 @@ export class DatabaseManager {
       // Run any pending migrations
       await this.runMigrations();
       
+      // Seed default data if needed
+      this.seedDefaultData();
+      
+      this.initialized = true;
       console.log('Database initialized successfully');
     } catch (error) {
       throw new Error(`Failed to initialize database: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  }
+
+  public async ensureInitialized(): Promise<void> {
+    if (!this.initialized) {
+      await this.initializeDatabase();
     }
   }
 
@@ -173,9 +190,14 @@ export class DatabaseManager {
         DROP TABLE IF EXISTS migrations;
       `);
       
-      // Reinitialize
+      // Reset initialization state
+      this.initialized = false;
+      
+      // Reinitialize the migration table first
+      this.initializeMigrationTable();
+      
+      // Then initialize the database (this will also seed default data)
       await this.initializeDatabase();
-      this.seedDefaultData();
       
       console.log('Database reset successfully');
     } catch (error) {
