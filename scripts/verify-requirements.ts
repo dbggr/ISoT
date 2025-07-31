@@ -43,15 +43,15 @@ class RequirementsVerifier {
   ): Promise<{ success: boolean; status: number; data: any }> {
     const url = `${this.baseUrl}${endpoint}`;
     let curlCommand = `curl -s -w "\\n%{http_code}" -X ${method}`;
-    
+
     if (data) {
       curlCommand += ` -H "Content-Type: application/json" -d '${JSON.stringify(data)}'`;
     }
-    
+
     curlCommand += ` "${url}"`;
 
     const result = this.runCommand(curlCommand);
-    
+
     if (!result.success) {
       return { success: false, status: 0, data: null };
     }
@@ -59,7 +59,7 @@ class RequirementsVerifier {
     const lines = result.output.trim().split('\n');
     const statusCode = parseInt(lines[lines.length - 1]);
     const responseBody = lines.slice(0, -1).join('\n');
-    
+
     let parsedData;
     try {
       parsedData = responseBody ? JSON.parse(responseBody) : null;
@@ -68,7 +68,7 @@ class RequirementsVerifier {
     }
 
     const success = expectedStatus ? statusCode === expectedStatus : statusCode >= 200 && statusCode < 300;
-    
+
     return {
       success,
       status: statusCode,
@@ -499,7 +499,7 @@ class RequirementsVerifier {
     const passRate = ((passed / total) * 100).toFixed(1);
 
     console.log(`✅ Passed: ${passed}/${total} (${passRate}%)`);
-    
+
     if (passed < total) {
       console.log(`❌ Failed: ${total - passed}/${total}`);
       console.log('\nFailed tests:');

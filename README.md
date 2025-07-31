@@ -1,11 +1,11 @@
-# Network Source of Truth (ISoT)
+# Infrastructure Source of Truth (ISoT)
 
 A centralized Infrastructure Source of Truth system for managing and tracking network infrastructure information, specifically designed for Infrastructure as Code (IaaC) environments.
 
 ## Overview
 
 The Network Source of Truth provides a comprehensive API-first solution for managing network resources, services, and their relationships. This system serves as the single source of truth for network infrastructure data, enabling teams to maintain accurate, up-to-date information about their network topology, services, and configurations.
-
+~~~~
 ## Features
 
 ### Core Functionality
@@ -16,7 +16,7 @@ The Network Source of Truth provides a comprehensive API-first solution for mana
 - **Data Validation**: Robust input validation for network-specific data (IP addresses, CIDR notation, port ranges)
 
 ### Technical Features
-- **Next.js API**: Modern, performant API built with Next.js 14
+- **Next.js API**: Modern, performant API built with Next.js 15
 - **SQLite Database**: Lightweight, file-based database perfect for development and small-to-medium deployments
 - **TypeScript**: Full type safety throughout the application
 - **Microservice Architecture**: Organized folder structure supporting microservice patterns
