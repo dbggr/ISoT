@@ -9,21 +9,21 @@ import { Group } from '@/lib/types'
 
 // Mock the dropdown menu components
 jest.mock('@/components/ui/dropdown-menu', () => ({
-  DropdownMenu: ({ children }: any) => <div data-testid="dropdown-menu">{children}</div>,
+  DropdownMenu: ({ children }: any) => (<div data-testid="dropdown-menu">{children}</div>),
   DropdownMenuTrigger: ({ children, asChild }: any) => {
     if (asChild) {
-      return <div data-testid="dropdown-trigger">{children}</div>
+      return (<div data-testid="dropdown-trigger">{children}</div>);
     }
-    return <button data-testid="dropdown-trigger">{children}</button>
+    return (<button data-testid="dropdown-trigger">{children}</button>);
   },
-  DropdownMenuContent: ({ children }: any) => <div data-testid="dropdown-content">{children}</div>,
+  DropdownMenuContent: ({ children }: any) => (<div data-testid="dropdown-content">{children}</div>),
   DropdownMenuItem: ({ children, onClick, asChild }: any) => {
     if (asChild) {
-      return <div data-testid="dropdown-item">{children}</div>
+      return (<div data-testid="dropdown-item">{children}</div>);
     }
-    return <button data-testid="dropdown-item" onClick={onClick}>{children}</button>
-  }
-}))
+    return (<button data-testid="dropdown-item" onClick={onClick}>{children}</button>);
+  },
+}));
 
 // Mock the confirmation dialog component
 jest.mock('@/components/common/confirmation-dialog', () => ({

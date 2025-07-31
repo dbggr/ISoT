@@ -10,7 +10,16 @@ import { SidebarProvider } from '@/components/ui/sidebar'
 
 // Mock Next.js router
 jest.mock('next/navigation', () => ({
-  usePathname: () => '/services',
+  useRouter: () => ({
+    push: jest.fn(),
+    replace: jest.fn(),
+    back: jest.fn(),
+    forward: jest.fn(),
+    refresh: jest.fn(),
+    prefetch: jest.fn(),
+  }),
+  useSearchParams: () => new URLSearchParams(),
+  usePathname: () => '/test',
 }))
 
 // Mock the mobile hook

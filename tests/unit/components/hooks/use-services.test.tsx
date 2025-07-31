@@ -26,7 +26,7 @@ jest.mock('../../../../lib/api', () => ({
   getErrorMessage: jest.fn((error) => error.message || 'Unknown error'),
 }))
 
-const mockApiClient = apiClient as jest.Mocked<typeof apiClient>
+const mockApiClient = apiClient as jest.Mocked<typeof apiClient>;
 
 // Mock data
 const mockService: NetworkService = {

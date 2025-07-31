@@ -20,8 +20,8 @@ jest.mock('../../../lib/hooks/use-groups', () => ({
 jest.mock('next/link', () => {
   return ({ children, href }: { children: React.ReactNode; href: string }) => (
     <a href={href}>{children}</a>
-  )
-})
+  );
+});
 
 // Mock PageHeader component
 jest.mock('../../../components/layout/page-header', () => ({

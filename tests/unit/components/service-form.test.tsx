@@ -10,9 +10,9 @@ import { NetworkService } from '@/lib/types'
 jest.mock('@/lib/hooks/use-groups')
 jest.mock('@/lib/hooks/use-services')
 
-const mockUseGroups = useGroups as jest.MockedFunction<typeof useGroups>
-const mockUseCreateService = useCreateService as jest.MockedFunction<typeof useCreateService>
-const mockUseUpdateService = useUpdateService as jest.MockedFunction<typeof useUpdateService>
+const mockUseGroups = useGroups as jest.MockedFunction<typeof useGroups>;
+const mockUseCreateService = useCreateService as jest.MockedFunction<typeof useCreateService>;
+const mockUseUpdateService = useUpdateService as jest.MockedFunction<typeof useUpdateService>;
 
 const mockGroups = [
   { id: '1', name: 'storage', description: 'Storage services', created_at: '2024-01-01', updated_at: '2024-01-01' },
