@@ -8,6 +8,9 @@ import {
   Server,
   Users,
   Settings,
+  Zap,
+  Network,
+  Shield,
 } from "lucide-react"
 
 import {
@@ -22,13 +25,13 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarRail,
-} from "@/components/ui/sidebar"
+} from "@/components/ui/sidebar-old"
 import { KEYBOARD_KEYS, ARIA_STATES } from "@/lib/accessibility"
 
 // Menu items for navigation
 const items = [
   {
-    title: "Dashboard",
+    title: "Network Grid",
     url: "/",
     icon: LayoutDashboard,
   },
@@ -88,67 +91,74 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       {...props}
       role="navigation"
       aria-label="Main navigation"
+      className="bg-gradient-to-b from-gray-900 to-black border-r border-gray-800"
     >
-      <SidebarHeader>
+      <SidebarHeader className="border-b border-gray-800">
         <div className="flex items-center gap-2 px-2 py-1">
           <div 
-            className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground"
+            className="flex aspect-square size-8 items-center justify-center rounded-lg bg-gradient-to-r from-cyan-500 to-blue-500 shadow-lg"
             role="img"
             aria-label="Network Source of Truth logo"
           >
-            <Settings className="size-4" />
+            <Zap className="size-4 text-white" />
           </div>
-          <div className="grid flex-1 text-left text-sm leading-tight">
-            <span className="truncate font-semibold">Network SoT</span>
-            <span className="truncate text-xs">Infrastructure Management</span>
+          <div className="flex flex-col">
+            <span className="text-sm font-semibold bg-gradient-to-r from-cyan-400 to-blue-400 bg-clip-text text-transparent">
+              ISoT
+            </span>
+            <span className="text-xs text-gray-400">Infrastructure</span>
           </div>
         </div>
       </SidebarHeader>
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel>Navigation</SidebarGroupLabel>
+          <SidebarGroupLabel className="text-gray-400 text-xs font-medium px-2 py-1">
+            Navigation
+          </SidebarGroupLabel>
           <SidebarGroupContent>
-            <SidebarMenu 
-              ref={navigationRef}
-              onKeyDown={handleKeyDown}
-              role="menubar"
-              aria-label="Main navigation menu"
-            >
-              {items.map((item, index) => (
-                <SidebarMenuItem key={item.title} role="none">
-                  <SidebarMenuButton 
-                    asChild
-                    isActive={pathname === item.url}
-                    tooltip={item.title}
-                    className="keyboard-focus touch-target"
-                  >
-                    <Link 
-                      href={item.url}
-                      role="menuitem"
-                      aria-current={pathname === item.url ? 'page' : undefined}
-                      aria-label={`${item.title} ${pathname === item.url ? '(current page)' : ''}`}
-                      tabIndex={index === 0 ? 0 : -1}
-                    >
-                      <item.icon aria-hidden="true" />
-                      <span>{item.title}</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
+            <SidebarMenu ref={navigationRef} onKeyDown={handleKeyDown}>
+              {items.map((item) => {
+                const Icon = item.icon
+                const isActive = pathname === item.url
+                return (
+                  <SidebarMenuItem key={item.url}>
+                    <SidebarMenuButton asChild isActive={isActive}>
+                      <Link 
+                        href={item.url}
+                        className={`group relative flex items-center gap-2 rounded-lg px-2 py-1.5 text-sm font-medium transition-all duration-200 ${
+                          isActive 
+                            ? 'bg-gradient-to-r from-cyan-500/20 to-blue-500/20 text-cyan-400 border border-cyan-500/30 shadow-lg' 
+                            : 'text-gray-300 hover:text-cyan-400 hover:bg-gray-800/50'
+                        }`}
+                        aria-current={isActive ? 'page' : undefined}
+                      >
+                        <Icon className={`size-4 transition-colors duration-200 ${
+                          isActive ? 'text-cyan-400' : 'text-gray-400 group-hover:text-cyan-400'
+                        }`} />
+                        <span className="truncate">{item.title}</span>
+                        {isActive && (
+                          <div className="absolute inset-0 rounded-lg bg-gradient-to-r from-cyan-500/10 to-blue-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
+                        )}
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                )
+              })}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
-      <SidebarFooter>
-        <div 
-          className="p-2 text-xs text-muted-foreground"
-          role="contentinfo"
-          aria-label="Application version"
-        >
-          Network Source of Truth v1.0
+      <SidebarFooter className="border-t border-gray-800">
+        <div className="flex items-center gap-2 px-2 py-1">
+          <div className="flex aspect-square size-6 items-center justify-center rounded bg-gradient-to-r from-green-500 to-emerald-500 shadow-sm">
+            <Shield className="size-3 text-white" />
+          </div>
+          <div className="flex flex-col">
+            <span className="text-xs font-medium text-gray-200">System Status</span>
+            <span className="text-xs text-green-400">Online</span>
+          </div>
         </div>
       </SidebarFooter>
-      <SidebarRail />
     </Sidebar>
   )
 }

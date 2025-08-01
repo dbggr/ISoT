@@ -38,7 +38,7 @@ interface GroupServicesTableProps {
   onDelete?: (service: NetworkService) => void
 }
 
-type SortField = 'name' | 'type' | 'created_at'
+type SortField = 'name' | 'type' | 'createdAt'
 type SortDirection = 'asc' | 'desc'
 
 export function GroupServicesTable({ services, loading = false, onDelete }: GroupServicesTableProps) {
@@ -55,7 +55,7 @@ export function GroupServicesTable({ services, loading = false, onDelete }: Grou
       service.name.toLowerCase().includes(term) ||
       service.type.toLowerCase().includes(term) ||
       (service.domain && service.domain.toLowerCase().includes(term)) ||
-      service.ip_addresses.some(ip => ip.includes(term))
+      service.ipAddress?.includes(term)
     )
   }, [services, searchTerm])
 
@@ -74,9 +74,9 @@ export function GroupServicesTable({ services, loading = false, onDelete }: Grou
           aValue = a.type.toLowerCase()
           bValue = b.type.toLowerCase()
           break
-        case 'created_at':
-          aValue = new Date(a.created_at).getTime()
-          bValue = new Date(b.created_at).getTime()
+        case 'createdAt':
+          aValue = new Date(a.createdAt).getTime()
+          bValue = new Date(b.createdAt).getTime()
           break
         default:
           aValue = a.name.toLowerCase()
@@ -235,11 +235,11 @@ export function GroupServicesTable({ services, loading = false, onDelete }: Grou
               <TableHead>
                 <Button
                   variant="ghost"
-                  onClick={() => handleSort('created_at')}
+                  onClick={() => handleSort('createdAt')}
                   className="h-auto p-0 font-semibold"
                 >
                   Created
-                  {getSortIcon('created_at')}
+                  {getSortIcon('createdAt')}
                 </Button>
               </TableHead>
               <TableHead className="w-[70px]"></TableHead>
@@ -278,28 +278,23 @@ export function GroupServicesTable({ services, loading = false, onDelete }: Grou
                   </TableCell>
                   <TableCell>
                     <div className="flex flex-wrap gap-1">
-                      {service.ip_addresses.slice(0, 2).map((ip, index) => (
-                        <Badge key={index} variant="outline" className="text-xs">
-                          {ip}
-                        </Badge>
-                      ))}
-                      {service.ip_addresses.length > 2 && (
+                      {service.ipAddress && (
                         <Badge variant="outline" className="text-xs">
-                          +{service.ip_addresses.length - 2} more
+                          {service.ipAddress}
                         </Badge>
                       )}
                     </div>
                   </TableCell>
                   <TableCell>
                     <div className="flex flex-wrap gap-1">
-                      {service.ports.slice(0, 3).map((port, index) => (
+                      {service.internalPorts?.slice(0, 3).map((port, index) => (
                         <Badge key={index} variant="outline" className="text-xs">
                           {port}
                         </Badge>
                       ))}
-                      {service.ports.length > 3 && (
+                      {service.internalPorts && service.internalPorts.length > 3 && (
                         <Badge variant="outline" className="text-xs">
-                          +{service.ports.length - 3} more
+                          +{service.internalPorts.length - 3} more
                         </Badge>
                       )}
                     </div>
@@ -308,7 +303,7 @@ export function GroupServicesTable({ services, loading = false, onDelete }: Grou
                     {service.domain || '-'}
                   </TableCell>
                   <TableCell className="text-muted-foreground">
-                    {formatDate(service.created_at)}
+                    {formatDate(service.createdAt)}
                   </TableCell>
                   <TableCell>
                     <DropdownMenu>

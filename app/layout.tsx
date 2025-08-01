@@ -1,16 +1,17 @@
-import type { Metadata } from 'next'
-import { Inter } from 'next/font/google'
-import './globals.css'
+import type React from "react"
+import type { Metadata } from "next"
+import { Geist_Mono as GeistMono } from "next/font/google"
+import "./globals.css"
 
 import { AppSidebar } from '@/components/layout/app-sidebar'
-import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar'
+import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar-old'
 import { Toaster } from '@/components/ui/toast'
 import { AccessibilityProvider } from '@/components/common/accessibility-provider'
 import { PerformanceMonitor } from '@/components/common/performance-monitor'
 import { CacheInitializer } from '@/components/common/cache-initializer'
-import { ResponsiveTest } from '@/components/common/responsive-test'
+import { cn } from '@/lib/utils'
 
-const inter = Inter({ subsets: ['latin'] })
+const geistMono = GeistMono({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
   title: {
@@ -73,12 +74,6 @@ export const metadata: Metadata = {
       'max-snippet': -1,
     },
   },
-  verification: {
-    // Add verification tokens if needed
-    // google: 'verification-token',
-    // yandex: 'verification-token',
-    // yahoo: 'verification-token',
-  },
 }
 
 export default function RootLayout({
@@ -88,22 +83,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={inter.className}>
-        <AccessibilityProvider>
-          <SidebarProvider>
-            <AppSidebar />
-            <SidebarInset>
-              <main id="main-content" role="main" className="focus:outline-none" tabIndex={-1}>
-                {children}
-              </main>
-            </SidebarInset>
-            <Toaster />
-            <PerformanceMonitor />
-            <CacheInitializer />
-            <ResponsiveTest />
-          </SidebarProvider>
-        </AccessibilityProvider>
-      </body>
+      <body className={`${geistMono.className} bg-black text-white antialiased`}>{children}</body>
     </html>
   )
 }

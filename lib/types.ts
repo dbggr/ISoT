@@ -4,21 +4,24 @@ export interface NetworkService {
   id: string
   name: string
   type: 'web' | 'database' | 'api' | 'storage' | 'security' | 'monitoring'
-  ip_addresses: string[]
-  ports: number[]
-  vlan_id?: number
+  ipAddress: string
+  internalPorts: number[]
+  externalPorts: number[]
+  vlan?: string
+  cidr?: string
   domain?: string
-  group_id: string
-  created_at: string
-  updated_at: string
+  groupId: string
+  tags?: string[]
+  createdAt: string
+  updatedAt: string
 }
 
 export interface Group {
   id: string
   name: string
   description?: string
-  created_at: string
-  updated_at: string
+  createdAt: string
+  updatedAt: string
   services?: NetworkService[]
 }
 
@@ -64,11 +67,14 @@ export interface ApiErrorResponse {
 export interface CreateServiceData {
   name: string
   type: NetworkService['type']
-  ip_addresses: string[]
-  ports: number[]
-  vlan_id?: number
+  ipAddress: string
+  internalPorts: number[]
+  externalPorts: number[]
+  vlan?: string
+  cidr?: string
   domain?: string
-  group_id: string
+  groupId: string
+  tags?: string[]
 }
 
 export interface UpdateServiceData extends Partial<CreateServiceData> {}

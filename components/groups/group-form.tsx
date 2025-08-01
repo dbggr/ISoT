@@ -174,22 +174,22 @@ export function GroupForm({ group, mode, onSuccess, onCancel }: GroupFormProps) 
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="form-responsive">
+      <form onSubmit={form.handleSubmit(onSubmit)} className="form-responsive space-y-6">
         <FormField
           control={form.control}
           name="name"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Group Name</FormLabel>
+              <FormLabel className="text-gray-200">Group Name</FormLabel>
               <FormControl>
                 <Input 
                   placeholder="Enter group name" 
                   {...field}
                   disabled={formSubmission.state.isSubmitting}
-                  className="touch-target"
+                  className="touch-target bg-gray-800 border-gray-700 text-gray-300 placeholder:text-gray-500 focus:border-pink-500 focus:ring-pink-500/20"
                 />
               </FormControl>
-              <FormDescription className="text-responsive-sm">
+              <FormDescription className="text-gray-400 text-responsive-sm">
                 A unique name for this group. This will be used to organize services.
               </FormDescription>
               <ValidationDisplay state={nameValidation} />
@@ -203,17 +203,17 @@ export function GroupForm({ group, mode, onSuccess, onCancel }: GroupFormProps) 
           name="description"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Description</FormLabel>
+              <FormLabel className="text-gray-200">Description</FormLabel>
               <FormControl>
                 <Textarea
                   placeholder="Enter group description (optional)"
-                  className="resize-none touch-target"
+                  className="resize-none touch-target bg-gray-800 border-gray-700 text-gray-300 placeholder:text-gray-500 focus:border-pink-500 focus:ring-pink-500/20"
                   rows={3}
                   {...field}
                   disabled={formSubmission.state.isSubmitting}
                 />
               </FormControl>
-              <FormDescription className="text-responsive-sm">
+              <FormDescription className="text-gray-400 text-responsive-sm">
                 Optional description to explain the purpose of this group.
               </FormDescription>
               <FormMessage />
@@ -224,24 +224,24 @@ export function GroupForm({ group, mode, onSuccess, onCancel }: GroupFormProps) 
         {/* Form Submission Feedback */}
         <FormSubmissionFeedback state={formSubmission.state} />
 
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-end space-y-2 sm:space-y-0 sm:space-x-2">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-end space-y-2 sm:space-y-0 sm:space-x-2 pt-4">
           <Button
             type="button"
             variant="outline"
             onClick={handleCancel}
             disabled={formSubmission.state.isSubmitting}
-            className="touch-target w-full sm:w-auto"
+            className="touch-target w-full sm:w-auto bg-gray-900/50 border-gray-700 text-gray-300 hover:bg-gray-800/50 hover:border-gray-600 transition-all duration-200"
           >
             Cancel
           </Button>
           <Button 
             type="submit" 
             disabled={formSubmission.state.isSubmitting || !form.formState.isValid}
-            className="touch-target w-full sm:w-auto"
+            className="touch-target w-full sm:w-auto bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white shadow-lg transition-all duration-200"
           >
             {formSubmission.state.isSubmitting ? (
               <>
-                <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-background border-t-foreground" />
+                <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
                 {mode === 'create' ? 'Creating...' : 'Updating...'}
               </>
             ) : (
@@ -252,8 +252,8 @@ export function GroupForm({ group, mode, onSuccess, onCancel }: GroupFormProps) 
 
         {/* Show warning if form is dirty and user tries to navigate away */}
         {isFormDirty && (
-          <div className="text-sm text-muted-foreground text-responsive-sm">
-            You have unsaved changes. Make sure to save before leaving this page.
+          <div className="text-sm text-yellow-400 text-responsive-sm bg-yellow-500/10 border border-yellow-500/20 rounded-lg p-3">
+            ⚠️ You have unsaved changes. Make sure to save before leaving this page.
           </div>
         )}
 

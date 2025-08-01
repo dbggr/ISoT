@@ -66,21 +66,25 @@ export const createServiceSchema = z.object({
     errorMap: () => ({ message: 'Please select a valid service type' })
   }),
   
-  ip_addresses: z.array(ipAddressSchema)
-    .min(1, 'At least one IP address is required')
-    .max(10, 'Maximum 10 IP addresses allowed'),
+  ipAddress: ipAddressSchema,
   
-  ports: z.array(portSchema)
-    .min(1, 'At least one port is required')
-    .max(50, 'Maximum 50 ports allowed'),
+  internalPorts: z.array(portSchema)
+    .min(1, 'At least one internal port is required')
+    .max(50, 'Maximum 50 internal ports allowed'),
   
-  vlan_id: vlanSchema.optional(),
+  externalPorts: z.array(portSchema)
+    .min(1, 'At least one external port is required')
+    .max(50, 'Maximum 50 external ports allowed'),
+  
+  vlan: vlanSchema.optional(),
   
   domain: domainSchema.optional(),
   
-  group_id: z.string()
+  groupId: z.string()
     .min(1, 'Group selection is required')
-    .uuid('Invalid group selection')
+    .uuid('Invalid group selection'),
+  
+  tags: z.array(z.string()).optional(),
 });
 
 // Service validation schema for editing (all fields optional except required ones)
@@ -95,24 +99,28 @@ export const updateServiceSchema = z.object({
     errorMap: () => ({ message: 'Please select a valid service type' })
   }).optional(),
   
-  ip_addresses: z.array(ipAddressSchema)
-    .min(1, 'At least one IP address is required')
-    .max(10, 'Maximum 10 IP addresses allowed')
+  ipAddress: ipAddressSchema.optional(),
+  
+  internalPorts: z.array(portSchema)
+    .min(1, 'At least one internal port is required')
+    .max(50, 'Maximum 50 internal ports allowed')
     .optional(),
   
-  ports: z.array(portSchema)
-    .min(1, 'At least one port is required')
-    .max(50, 'Maximum 50 ports allowed')
+  externalPorts: z.array(portSchema)
+    .min(1, 'At least one external port is required')
+    .max(50, 'Maximum 50 external ports allowed')
     .optional(),
   
-  vlan_id: vlanSchema.optional(),
+  vlan: vlanSchema.optional(),
   
   domain: domainSchema.optional(),
   
-  group_id: z.string()
+  groupId: z.string()
     .min(1, 'Group selection is required')
     .uuid('Invalid group selection')
-    .optional()
+    .optional(),
+  
+  tags: z.array(z.string()).optional(),
 });
 
 // Group validation schema for creation

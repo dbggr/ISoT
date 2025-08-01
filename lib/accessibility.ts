@@ -113,6 +113,8 @@ export class FocusManager {
   private static focusStack: HTMLElement[] = []
 
   static pushFocus(element: HTMLElement) {
+    if (typeof window === 'undefined') return
+    
     const currentFocus = document.activeElement as HTMLElement
     if (currentFocus && currentFocus !== document.body) {
       this.focusStack.push(currentFocus)
@@ -121,6 +123,8 @@ export class FocusManager {
   }
 
   static popFocus() {
+    if (typeof window === 'undefined') return
+    
     const previousFocus = this.focusStack.pop()
     if (previousFocus) {
       previousFocus.focus()
@@ -128,48 +132,61 @@ export class FocusManager {
   }
 
   static trapFocus(container: HTMLElement, event: KeyboardEvent) {
-    if (event.key !== KEYBOARD_KEYS.TAB) return
-
-    const focusableElements = container.querySelectorAll(
-      'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
-    ) as NodeListOf<HTMLElement>
+    if (typeof window === 'undefined') return
+    
+    const focusableElements = this.getFocusableElements(container)
+    if (focusableElements.length === 0) return
 
     const firstElement = focusableElements[0]
     const lastElement = focusableElements[focusableElements.length - 1]
 
-    if (event.shiftKey) {
-      if (document.activeElement === firstElement) {
-        event.preventDefault()
-        lastElement.focus()
-      }
-    } else {
-      if (document.activeElement === lastElement) {
-        event.preventDefault()
-        firstElement.focus()
+    if (event.key === 'Tab') {
+      if (event.shiftKey) {
+        if (document.activeElement === firstElement) {
+          event.preventDefault()
+          lastElement.focus()
+        }
+      } else {
+        if (document.activeElement === lastElement) {
+          event.preventDefault()
+          firstElement.focus()
+        }
       }
     }
   }
 
   static getFocusableElements(container: HTMLElement): HTMLElement[] {
-    return Array.from(
-      container.querySelectorAll(
-        'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"]):not([disabled])'
-      )
-    ) as HTMLElement[]
+    if (typeof window === 'undefined') return []
+    
+    const focusableSelectors = [
+      'a[href]',
+      'button:not([disabled])',
+      'input:not([disabled])',
+      'select:not([disabled])',
+      'textarea:not([disabled])',
+      '[tabindex]:not([tabindex="-1"])',
+      '[contenteditable="true"]'
+    ]
+
+    const elements = container.querySelectorAll(focusableSelectors.join(','))
+    return Array.from(elements) as HTMLElement[]
   }
 }
 
 // Screen reader announcement utility
 export class ScreenReaderAnnouncer {
   private static instance: ScreenReaderAnnouncer
-  private announcer: HTMLElement
+  private announcer: HTMLElement | null = null
 
   private constructor() {
-    this.announcer = document.createElement('div')
-    this.announcer.setAttribute('aria-live', 'polite')
-    this.announcer.setAttribute('aria-atomic', 'true')
-    this.announcer.className = 'sr-only'
-    document.body.appendChild(this.announcer)
+    // Only create the announcer element in the browser
+    if (typeof window !== 'undefined' && typeof document !== 'undefined') {
+      this.announcer = document.createElement('div')
+      this.announcer.setAttribute('aria-live', 'polite')
+      this.announcer.setAttribute('aria-atomic', 'true')
+      this.announcer.className = 'sr-only'
+      document.body.appendChild(this.announcer)
+    }
   }
 
   static getInstance(): ScreenReaderAnnouncer {
@@ -180,13 +197,18 @@ export class ScreenReaderAnnouncer {
   }
 
   announce(message: string, priority: 'polite' | 'assertive' = 'polite') {
-    this.announcer.setAttribute('aria-live', priority)
-    this.announcer.textContent = message
-    
-    // Clear after announcement to allow repeated announcements
-    setTimeout(() => {
-      this.announcer.textContent = ''
-    }, 1000)
+    // Only announce if we're in the browser and have an announcer element
+    if (typeof window !== 'undefined' && this.announcer) {
+      this.announcer.setAttribute('aria-live', priority)
+      this.announcer.textContent = message
+      
+      // Clear after announcement to allow repeated announcements
+      setTimeout(() => {
+        if (this.announcer) {
+          this.announcer.textContent = ''
+        }
+      }, 1000)
+    }
   }
 }
 
@@ -215,6 +237,8 @@ export class HighContrastManager {
   }
 
   private static updateHighContrastClass(isHighContrast: boolean) {
+    if (typeof window === 'undefined' || typeof document === 'undefined') return
+    
     if (isHighContrast) {
       document.documentElement.classList.add('high-contrast')
     } else {
@@ -223,6 +247,8 @@ export class HighContrastManager {
   }
 
   private static updateForcedColorsClass(isForcedColors: boolean) {
+    if (typeof window === 'undefined' || typeof document === 'undefined') return
+    
     if (isForcedColors) {
       document.documentElement.classList.add('forced-colors')
     } else {
@@ -279,6 +305,10 @@ export const generateId = (() => {
 
 // Skip link utility
 export const createSkipLink = (targetId: string, text: string = 'Skip to main content') => {
+  if (typeof window === 'undefined' || typeof document === 'undefined') {
+    return null
+  }
+  
   const skipLink = document.createElement('a')
   skipLink.href = `#${targetId}`
   skipLink.textContent = text

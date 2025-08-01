@@ -139,3 +139,4 @@ coverage/
 # Package manager lock files (keep one, ignore others)
 # yarn.lock
 # pnpm-lock.yaml
+tactical-command

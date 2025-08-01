@@ -60,7 +60,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { useToast } from "@/hooks/use-toast"
 
 // Types for sorting and filtering
-type SortField = 'name' | 'type' | 'group' | 'created_at'
+type SortField = 'name' | 'type' | 'group' | 'createdAt'
 type SortOrder = 'asc' | 'desc'
 
 interface SortConfig {
@@ -144,12 +144,12 @@ export function ServicesTable({
             bValue = b.type.toLowerCase()
             break
           case 'group':
-            aValue = (groupsMap[a.group_id]?.name || '').toLowerCase()
-            bValue = (groupsMap[b.group_id]?.name || '').toLowerCase()
+            aValue = (groupsMap[a.groupId]?.name || '').toLowerCase()
+            bValue = (groupsMap[b.groupId]?.name || '').toLowerCase()
             break
-          case 'created_at':
-            aValue = new Date(a.created_at).getTime()
-            bValue = new Date(b.created_at).getTime()
+          case 'createdAt':
+            aValue = new Date(a.createdAt).getTime()
+            bValue = new Date(b.createdAt).getTime()
             break
           default:
             aValue = a.name.toLowerCase()
@@ -345,12 +345,12 @@ export function ServicesTable({
     const rows = services.map(service => [
       service.name,
       service.type,
-      service.ip_addresses.join('; '),
-      service.ports.join('; '),
-      service.vlan_id || '',
+      service.ipAddress || '',
+      service.internalPorts?.join('; ') || '',
+      service.vlan || '',
       service.domain || '',
-      groupsMap[service.group_id]?.name || 'Unknown',
-      new Date(service.created_at).toISOString()
+      groupsMap[service.groupId]?.name || 'Unknown',
+      new Date(service.createdAt).toISOString()
     ])
     
     const csvContent = [headers, ...rows]
@@ -407,6 +407,7 @@ export function ServicesTable({
   }
 
   const formatServiceType = (type: NetworkService['type']) => {
+    if (!type) return 'Unknown'
     return type.charAt(0).toUpperCase() + type.slice(1)
   }
 
@@ -421,20 +422,20 @@ export function ServicesTable({
   // Loading skeleton
   if (servicesLoading || groupsLoading) {
     return (
-      <Card>
+      <Card className="border-0 bg-gradient-to-br from-gray-900 to-gray-800 shadow-2xl hover:shadow-cyan-500/20 transition-all duration-300">
         <CardHeader>
-          <CardTitle>Network Services</CardTitle>
+          <CardTitle className="text-gray-100">Network Services</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
             <div className="flex gap-4">
-              <Skeleton className="h-10 w-64" />
-              <Skeleton className="h-10 w-32" />
-              <Skeleton className="h-10 w-32" />
+              <Skeleton className="h-10 w-64 bg-gray-700" />
+              <Skeleton className="h-10 w-32 bg-gray-700" />
+              <Skeleton className="h-10 w-32 bg-gray-700" />
             </div>
             <div className="space-y-2">
               {Array.from({ length: 5 }).map((_, i) => (
-                <Skeleton key={i} className="h-12 w-full" />
+                <Skeleton key={i} className="h-12 w-full bg-gray-700" />
               ))}
             </div>
           </div>
@@ -446,14 +447,14 @@ export function ServicesTable({
   // Error state
   if (servicesError) {
     return (
-      <Card>
+      <Card className="border-0 bg-gradient-to-br from-gray-900 to-gray-800 shadow-2xl hover:shadow-cyan-500/20 transition-all duration-300">
         <CardHeader>
-          <CardTitle>Network Services</CardTitle>
+          <CardTitle className="text-gray-100">Network Services</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="text-center py-8">
-            <p className="text-destructive mb-4">Error loading services: {servicesError}</p>
-            <Button onClick={refetch} variant="outline">
+            <p className="text-red-400 mb-4">Error loading services: {servicesError}</p>
+            <Button onClick={refetch} variant="outline" className="border-cyan-500/30 text-cyan-400 hover:bg-cyan-500/10 hover:border-cyan-500/50 transition-all duration-200">
               Try Again
             </Button>
           </div>
@@ -463,20 +464,20 @@ export function ServicesTable({
   }
 
   return (
-    <Card>
+    <Card className="border-0 bg-gradient-to-br from-gray-900 to-gray-800 shadow-2xl hover:shadow-cyan-500/20 transition-all duration-300">
       <CardHeader>
-        <CardTitle>Network Services</CardTitle>
+        <CardTitle className="text-gray-100">Network Services</CardTitle>
         
         {/* Enhanced Search and Filter Controls */}
         <div className="flex flex-col gap-4">
           {/* Local Search Bar for Services */}
           <div className="relative w-full">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
             <Input
               placeholder="Search services..."
               value={filters.search}
               onChange={(e) => setFilters(prev => ({ ...prev, search: e.target.value }))}
-              className="pl-9 touch-target"
+              className="pl-9 touch-target bg-gray-800 border-gray-700 text-gray-300"
             />
             {filters.search && (
               <Button
@@ -506,7 +507,7 @@ export function ServicesTable({
                 </span>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="outline" size="sm" className="touch-target w-full sm:w-auto">
+                    <Button variant="outline" size="sm" className="touch-target w-full sm:w-auto bg-gray-900/50 border-cyan-500/30 text-cyan-400 hover:bg-cyan-500/20 hover:border-cyan-500/50">
                       Bulk Actions
                     </Button>
                   </DropdownMenuTrigger>
@@ -562,7 +563,7 @@ export function ServicesTable({
                     {emptyState.description}
                   </p>
                   {emptyState.showClearFilters && (
-                    <Button variant="outline" onClick={clearAllFilters}>
+                    <Button variant="outline" onClick={clearAllFilters} className="bg-gray-900/50 border-cyan-500/30 text-cyan-400 hover:bg-cyan-500/20 hover:border-cyan-500/50">
                       Clear All Filters
                     </Button>
                   )}
@@ -626,11 +627,11 @@ export function ServicesTable({
                       <Button 
                         variant="ghost" 
                         size="sm" 
-                        onClick={() => handleSort('created_at')}
+                        onClick={() => handleSort('createdAt')}
                         className="h-auto p-0 font-medium touch-target"
                       >
                         Created
-                        <SortIcon field="created_at" />
+                        <SortIcon field="createdAt" />
                       </Button>
                     </TableHead>
                     <TableHead className="w-12 sticky right-0 bg-background z-10">Actions</TableHead>
@@ -671,18 +672,18 @@ export function ServicesTable({
                         </span>
                       </TableCell>
                       <TableCell className="font-mono text-sm hidden sm:table-cell">
-                        <div className="max-w-[120px] truncate" title={service.ip_addresses.join(', ')}>
-                          {formatIpAddresses(service.ip_addresses)}
+                        <div className="max-w-[120px] truncate" title={service.ipAddress || ''}>
+                          {service.ipAddress ? formatIpAddresses(service.ipAddress.split(',')) : "None"}
                         </div>
                       </TableCell>
                       <TableCell className="font-mono text-sm hidden sm:table-cell">
-                        <div className="max-w-[80px] truncate" title={service.ports.join(', ')}>
-                          {formatPorts(service.ports)}
+                        <div className="max-w-[80px] truncate" title={service.internalPorts?.join(', ') || ''}>
+                          {service.internalPorts?.join('; ') || 'None'}
                         </div>
                       </TableCell>
                       <TableCell className="hidden md:table-cell">
-                        {service.vlan_id ? (
-                          <span className="font-mono text-sm">{service.vlan_id}</span>
+                        {service.vlan ? (
+                          <span className="font-mono text-sm">{service.vlan}</span>
                         ) : (
                           <span className="text-muted-foreground">-</span>
                         )}
@@ -697,12 +698,12 @@ export function ServicesTable({
                         )}
                       </TableCell>
                       <TableCell>
-                        <div className="max-w-[100px] truncate" title={groupsMap[service.group_id]?.name || 'Unknown'}>
-                          {groupsMap[service.group_id]?.name || 'Unknown'}
+                        <div className="max-w-[100px] truncate" title={groupsMap[service.groupId]?.name || 'Unknown'}>
+                          {groupsMap[service.groupId]?.name || 'Unknown'}
                         </div>
                       </TableCell>
                       <TableCell className="text-muted-foreground hidden lg:table-cell">
-                        {new Date(service.created_at).toLocaleDateString()}
+                        {new Date(service.createdAt).toLocaleDateString()}
                       </TableCell>
                       <TableCell className="sticky right-0 bg-background z-10">
                         <DropdownMenu>

@@ -6,13 +6,13 @@ import { ChevronRight, Home } from "lucide-react"
 
 import { Suspense } from "react"
 import { Button } from "@/components/ui/button"
-import { SidebarTrigger } from "@/components/ui/sidebar"
+import { SidebarTrigger } from "@/components/ui/sidebar-old"
 import { Separator } from "@/components/ui/separator"
 import { GlobalSearch } from "@/components/common/global-search"
 import { Skeleton } from "@/components/ui/skeleton"
 
 interface PageHeaderProps {
-  title?: string
+  title?: string | React.ReactNode
   description?: string
   action?: React.ReactNode
 }
@@ -66,25 +66,25 @@ export function PageHeader({ title, description, action }: PageHeaderProps) {
   const pageTitle = title || breadcrumbs[breadcrumbs.length - 1]?.label || 'Dashboard'
 
   return (
-    <header className="flex min-h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12 flex-col sm:flex-row">
+    <header className="flex min-h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12 flex-col sm:flex-row bg-gray-900/50 backdrop-blur-sm border-b border-gray-800">
       <div className="flex items-center gap-2 px-4 w-full sm:w-auto">
-        <SidebarTrigger className="-ml-1 touch-friendly" />
-        <Separator orientation="vertical" className="mr-2 h-4 hidden sm:block" />
+        <SidebarTrigger className="-ml-1 touch-friendly text-gray-300 hover:text-pink-400" />
+        <Separator orientation="vertical" className="mr-2 h-4 hidden sm:block bg-gray-700" />
         
         {/* Breadcrumb Navigation - Hidden on mobile, shown on tablet+ */}
-        <nav className="hidden sm:flex items-center space-x-1 text-sm text-muted-foreground">
+        <nav className="hidden sm:flex items-center space-x-1 text-sm text-gray-400">
           {breadcrumbs.map((breadcrumb, index) => (
             <div key={breadcrumb.href} className="flex items-center">
-              {index > 0 && <ChevronRight className="h-4 w-4 mx-1" />}
+              {index > 0 && <ChevronRight className="h-4 w-4 mx-1 text-gray-600" />}
               {index === breadcrumbs.length - 1 ? (
-                <span className="font-medium text-foreground flex items-center gap-1">
+                <span className="font-medium text-pink-400 flex items-center gap-1">
                   {breadcrumb.icon && <breadcrumb.icon className="h-4 w-4" />}
                   {breadcrumb.label}
                 </span>
               ) : (
                 <Link 
                   href={breadcrumb.href}
-                  className="hover:text-foreground transition-colors flex items-center gap-1 touch-friendly"
+                  className="hover:text-pink-400 transition-colors flex items-center gap-1 touch-friendly text-gray-400"
                 >
                   {breadcrumb.icon && <breadcrumb.icon className="h-4 w-4" />}
                   {breadcrumb.label}
@@ -98,16 +98,18 @@ export function PageHeader({ title, description, action }: PageHeaderProps) {
       {/* Page Title, Search, and Action - Responsive layout */}
       <div className="flex flex-1 items-start sm:items-center justify-between px-4 w-full flex-col sm:flex-row gap-2 sm:gap-4">
         <div className="w-full sm:w-auto">
-          <h1 className="text-lg sm:text-xl font-semibold">{pageTitle}</h1>
+          <h1 className="text-lg sm:text-xl font-semibold text-gray-100">
+            {typeof pageTitle === 'string' ? pageTitle : pageTitle}
+          </h1>
           {description && (
-            <p className="text-sm text-muted-foreground hidden sm:block">{description}</p>
+            <p className="text-sm text-gray-400 hidden sm:block">{description}</p>
           )}
         </div>
         
         {/* Global Search - Hidden on dashboard, shown on other pages */}
         {pathname !== '/' && (
           <div className="w-full sm:w-80 order-first sm:order-none">
-            <Suspense fallback={<Skeleton className="h-10 w-full" />}>
+            <Suspense fallback={<Skeleton className="h-10 w-full bg-gray-800" />}>
               <GlobalSearch 
                 placeholder="Search services and groups..."
                 className="w-full"

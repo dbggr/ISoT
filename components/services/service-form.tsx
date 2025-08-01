@@ -76,41 +76,46 @@ export function ServiceForm({ mode, service, onSuccess, onCancel }: ServiceFormP
     defaultValues: isEditing && service ? {
       name: service.name,
       type: service.type,
-      ip_addresses: service.ip_addresses.length > 0 ? service.ip_addresses : [''],
-      ports: service.ports.length > 0 ? service.ports : [80],
-      vlan_id: service.vlan_id,
+      ipAddress: service.ipAddress || '',
+      internalPorts: service.internalPorts?.length > 0 ? service.internalPorts : [80],
+      externalPorts: service.externalPorts?.length > 0 ? service.externalPorts : [80],
+      vlan: typeof service.vlan === 'number' ? service.vlan : undefined,
       domain: service.domain || '',
-      group_id: service.group_id,
+      groupId: service.groupId,
     } : {
       name: '',
       type: 'web' as const,
-      ip_addresses: [''],
-      ports: [80],
-      vlan_id: undefined,
+      ipAddress: '',
+      internalPorts: [80],
+      externalPorts: [80],
+      vlan: undefined,
       domain: '',
-      group_id: '',
+      groupId: '',
     },
   })
 
   // Enhanced state management for dynamic arrays
-  const [ipAddresses, setIpAddresses] = React.useState<string[]>(
-    isEditing && service ? service.ip_addresses : ['']
+  const [internalPorts, setInternalPorts] = React.useState<number[]>(
+    isEditing && service ? service.internalPorts : [80]
   )
-  const [ports, setPorts] = React.useState<number[]>(
-    isEditing && service ? service.ports : [80]
+  const [externalPorts, setExternalPorts] = React.useState<number[]>(
+    isEditing && service ? service.externalPorts : [80]
   )
 
   // Watch form values for validation
   const watchedName = form.watch('name')
-  const watchedVlan = form.watch('vlan_id')
+  const watchedVlan = form.watch('vlan')
   const watchedDomain = form.watch('domain')
+  const watchedIpAddress = form.watch('ipAddress')
 
   // Field-level validation hooks
   const nameValidation = useServiceNameValidation(watchedName || '', service?.id)
   const vlanValidation = useVLANValidation(watchedVlan)
   const domainValidation = useDomainValidation(watchedDomain)
-  const ipArrayValidation = useIPAddressArrayValidation(ipAddresses)
-  const portArrayValidation = usePortArrayValidation(ports)
+  // For single ipAddress field, validate as string
+  const ipValidation = useIPAddressArrayValidation([watchedIpAddress])
+  const internalPortArrayValidation = usePortArrayValidation(internalPorts)
+  const externalPortArrayValidation = usePortArrayValidation(externalPorts)
 
   // Reset form when service changes (for edit mode)
   useEffect(() => {
@@ -118,28 +123,27 @@ export function ServiceForm({ mode, service, onSuccess, onCancel }: ServiceFormP
       form.reset({
         name: service.name,
         type: service.type,
-        ip_addresses: service.ip_addresses,
-        ports: service.ports,
-        vlan_id: service.vlan_id,
+        ipAddress: service.ipAddress || '',
+        internalPorts: service.internalPorts,
+        externalPorts: service.externalPorts,
+        vlan: typeof service.vlan === 'number' ? service.vlan : undefined,
         domain: service.domain || '',
-        group_id: service.group_id,
+        groupId: service.groupId,
       })
     }
   }, [service, isEditing, form])
 
   const onSubmit = async (data: CreateServiceInput) => {
     formSubmission.setSubmitting(true)
-    
     try {
       // Merge form data with state arrays
       const submitData = {
         ...data,
-        ip_addresses: ipAddresses.filter(ip => ip.trim() !== ''),
-        ports: ports.filter(port => port > 0)
+        internalPorts: internalPorts.filter(port => port > 0),
+        externalPorts: externalPorts.filter(port => port > 0),
+        vlan: typeof data.vlan === 'number' ? String(data.vlan) : undefined,
       }
-
       let result: NetworkService | void
-      
       if (isEditing && service) {
         result = await updateService.mutate({ 
           id: service.id, 
@@ -160,9 +164,7 @@ export function ServiceForm({ mode, service, onSuccess, onCancel }: ServiceFormP
           )
         }
       }
-
       formSubmission.setSuccess(isEditing ? 'Service updated successfully' : 'Service created successfully')
-      
       if (onSuccess && result) {
         onSuccess(result)
       }
@@ -193,38 +195,34 @@ export function ServiceForm({ mode, service, onSuccess, onCancel }: ServiceFormP
     await form.handleSubmit(onSubmit)()
   }
 
-  const handleAddIpAddress = () => {
-    setIpAddresses([...ipAddresses, ''])
+  // Port handlers
+  const handleAddInternalPort = () => {
+    setInternalPorts([...internalPorts, 80])
   }
-
-  const handleRemoveIpAddress = (index: number) => {
-    if (ipAddresses.length > 1) {
-      setIpAddresses(ipAddresses.filter((_, i) => i !== index))
+  const handleRemoveInternalPort = (index: number) => {
+    if (internalPorts.length > 1) {
+      setInternalPorts(internalPorts.filter((_, i) => i !== index))
     }
   }
-
-  const handleAddPort = () => {
-    setPorts([...ports, 80])
-  }
-
-  const handleRemovePort = (index: number) => {
-    if (ports.length > 1) {
-      setPorts(ports.filter((_, i) => i !== index))
-    }
-  }
-
-  const handleIpChange = (index: number, value: string) => {
-    const newIpAddresses = [...ipAddresses]
-    newIpAddresses[index] = value
-    setIpAddresses(newIpAddresses)
-    form.setValue('ip_addresses', newIpAddresses)
-  }
-
-  const handlePortChange = (index: number, value: number) => {
-    const newPorts = [...ports]
+  const handleInternalPortChange = (index: number, value: number) => {
+    const newPorts = [...internalPorts]
     newPorts[index] = value
-    setPorts(newPorts)
-    form.setValue('ports', newPorts)
+    setInternalPorts(newPorts)
+    form.setValue('internalPorts', newPorts)
+  }
+  const handleAddExternalPort = () => {
+    setExternalPorts([...externalPorts, 80])
+  }
+  const handleRemoveExternalPort = (index: number) => {
+    if (externalPorts.length > 1) {
+      setExternalPorts(externalPorts.filter((_, i) => i !== index))
+    }
+  }
+  const handleExternalPortChange = (index: number, value: number) => {
+    const newPorts = [...externalPorts]
+    newPorts[index] = value
+    setExternalPorts(newPorts)
+    form.setValue('externalPorts', newPorts)
   }
 
   return (
@@ -303,8 +301,8 @@ export function ServiceForm({ mode, service, onSuccess, onCancel }: ServiceFormP
                   type="button"
                   variant="outline"
                   size="sm"
-                  onClick={handleAddIpAddress}
-                  disabled={ipAddresses.length >= 10}
+                  onClick={() => {}} // No add button for IP addresses
+                  disabled={false} // No limit for IP addresses
                   className="touch-target"
                 >
                   <Plus className="h-4 w-4 mr-2" />
@@ -313,44 +311,31 @@ export function ServiceForm({ mode, service, onSuccess, onCancel }: ServiceFormP
                 </Button>
               </div>
               <div className="space-y-2">
-                {ipAddresses.map((ip, index) => (
-                  <div key={index} className="flex items-center space-x-2">
-                    <Input
-                      placeholder="192.168.1.100"
-                      value={ip}
-                      onChange={(e) => handleIpChange(index, e.target.value)}
-                      className="touch-target"
-                    />
-                    {ipAddresses.length > 1 && (
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleRemoveIpAddress(index)}
-                        className="touch-target"
-                      >
-                        <X className="h-4 w-4" />
-                      </Button>
-                    )}
-                  </div>
-                ))}
+                <div className="flex items-center space-x-2">
+                  <Input
+                    placeholder="192.168.1.100"
+                    value={watchedIpAddress}
+                    onChange={(e) => form.setValue('ipAddress', e.target.value)}
+                    className="touch-target"
+                  />
+                </div>
               </div>
               <FormDescription>
                 IPv4 addresses where this service is accessible (maximum 10)
               </FormDescription>
-              <ValidationDisplay state={ipArrayValidation} />
+              <ValidationDisplay state={ipValidation} />
             </div>
 
             {/* Ports */}
             <div className="space-y-4">
               <div className="flex items-center justify-between">
-                <FormLabel>Ports</FormLabel>
+                <FormLabel>Internal Ports</FormLabel>
                 <Button
                   type="button"
                   variant="outline"
                   size="sm"
-                  onClick={handleAddPort}
-                  disabled={ports.length >= 50}
+                  onClick={handleAddInternalPort}
+                  disabled={internalPorts.length >= 50}
                   className="touch-target"
                 >
                   <Plus className="h-4 w-4 mr-2" />
@@ -359,7 +344,7 @@ export function ServiceForm({ mode, service, onSuccess, onCancel }: ServiceFormP
                 </Button>
               </div>
               <div className="space-y-2">
-                {ports.map((port, index) => (
+                {internalPorts.map((port, index) => (
                   <div key={index} className="flex items-center space-x-2">
                     <Input
                       type="number"
@@ -367,15 +352,15 @@ export function ServiceForm({ mode, service, onSuccess, onCancel }: ServiceFormP
                       min="1"
                       max="65535"
                       value={port}
-                      onChange={(e) => handlePortChange(index, parseInt(e.target.value) || 0)}
+                      onChange={(e) => handleInternalPortChange(index, parseInt(e.target.value) || 0)}
                       className="touch-target"
                     />
-                    {ports.length > 1 && (
+                    {internalPorts.length > 1 && (
                       <Button
                         type="button"
                         variant="outline"
                         size="sm"
-                        onClick={() => handleRemovePort(index)}
+                        onClick={() => handleRemoveInternalPort(index)}
                         className="touch-target"
                       >
                         <X className="h-4 w-4" />
@@ -387,13 +372,62 @@ export function ServiceForm({ mode, service, onSuccess, onCancel }: ServiceFormP
               <FormDescription>
                 Port numbers where this service listens (1-65535, maximum 50)
               </FormDescription>
-              <ValidationDisplay state={portArrayValidation} />
+              <ValidationDisplay state={internalPortArrayValidation} />
+            </div>
+
+            {/* External Ports */}
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <FormLabel>External Ports</FormLabel>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={handleAddExternalPort}
+                  disabled={externalPorts.length >= 50}
+                  className="touch-target"
+                >
+                  <Plus className="h-4 w-4 mr-2" />
+                  <span className="hidden sm:inline">Add Port</span>
+                  <span className="sm:hidden">Add</span>
+                </Button>
+              </div>
+              <div className="space-y-2">
+                {externalPorts.map((port, index) => (
+                  <div key={index} className="flex items-center space-x-2">
+                    <Input
+                      type="number"
+                      placeholder="80"
+                      min="1"
+                      max="65535"
+                      value={port}
+                      onChange={(e) => handleExternalPortChange(index, parseInt(e.target.value) || 0)}
+                      className="touch-target"
+                    />
+                    {externalPorts.length > 1 && (
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleRemoveExternalPort(index)}
+                        className="touch-target"
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    )}
+                  </div>
+                ))}
+              </div>
+              <FormDescription>
+                Port numbers where this service is accessible (1-65535, maximum 50)
+              </FormDescription>
+              <ValidationDisplay state={externalPortArrayValidation} />
             </div>
 
             {/* VLAN ID */}
             <FormField
               control={form.control}
-              name="vlan_id"
+              name="vlan"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>VLAN ID (Optional)</FormLabel>
@@ -444,7 +478,7 @@ export function ServiceForm({ mode, service, onSuccess, onCancel }: ServiceFormP
             {/* Group Selection */}
             <FormField
               control={form.control}
-              name="group_id"
+              name="groupId"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Group</FormLabel>

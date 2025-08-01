@@ -37,4 +37,4 @@ export {
   SidebarSeparator,
   SidebarTrigger,
   useSidebar,
-} from './sidebar'
+} from './sidebar-old'

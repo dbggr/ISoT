@@ -5,7 +5,7 @@
 import React from 'react'
 import { render, screen, waitFor } from '@testing-library/react'
 import '@testing-library/jest-dom'
-import HomePage from '../../../app/page'
+import HomePage from '../../../app/page-old'
 
 // Mock the hooks
 jest.mock('../../../lib/hooks/use-services', () => ({

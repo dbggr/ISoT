@@ -42,7 +42,7 @@ interface GroupsTableProps {
   onDelete?: (group: Group) => void
 }
 
-type SortField = 'name' | 'description' | 'created_at' | 'service_count'
+type SortField = 'name' | 'description' | 'createdAt' | 'service_count'
 type SortDirection = 'asc' | 'desc'
 
 export function GroupsTable({ groups, loading = false, onDelete }: GroupsTableProps) {
@@ -77,9 +77,9 @@ export function GroupsTable({ groups, loading = false, onDelete }: GroupsTablePr
           aValue = (a.description || '').toLowerCase()
           bValue = (b.description || '').toLowerCase()
           break
-        case 'created_at':
-          aValue = new Date(a.created_at).getTime()
-          bValue = new Date(b.created_at).getTime()
+        case 'createdAt':
+          aValue = new Date(a.createdAt).getTime()
+          bValue = new Date(b.createdAt).getTime()
           break
         case 'service_count':
           aValue = a.services?.length || 0
@@ -137,14 +137,14 @@ export function GroupsTable({ groups, loading = false, onDelete }: GroupsTablePr
     return (
       <div className="space-y-4">
         <div className="flex items-center space-x-2">
-          <Search className="h-4 w-4 text-muted-foreground" />
+          <Search className="h-4 w-4 text-gray-400" />
           <Input
             placeholder="Search groups..."
-            className="max-w-sm"
+            className="max-w-sm bg-gray-800 border-gray-700 text-gray-300"
             disabled
           />
         </div>
-        <div className="rounded-md border">
+        <div className="rounded-md border-0 bg-gradient-to-br from-gray-900 to-gray-800 shadow-2xl hover:shadow-pink-500/20 transition-all duration-300">
           <Table>
             <TableHeader>
               <TableRow>
@@ -186,17 +186,17 @@ export function GroupsTable({ groups, loading = false, onDelete }: GroupsTablePr
     <div className="space-y-4">
       {/* Search - Mobile Responsive */}
       <div className="flex items-center space-x-2">
-        <Search className="h-4 w-4 text-muted-foreground" />
+        <Search className="h-4 w-4 text-gray-400" />
         <Input
           placeholder="Search groups..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="w-full sm:max-w-sm touch-target"
+          className="w-full sm:max-w-sm touch-target bg-gray-800 border-gray-700 text-gray-300"
         />
       </div>
 
       {/* Responsive Table Container */}
-      <div className="rounded-md border table-responsive">
+      <div className="rounded-md border-0 bg-gradient-to-br from-gray-900 to-gray-800 shadow-2xl hover:shadow-pink-500/20 transition-all duration-300 table-responsive">
         <Table>
           <TableHeader>
             <TableRow>
@@ -233,11 +233,11 @@ export function GroupsTable({ groups, loading = false, onDelete }: GroupsTablePr
               <TableHead className="min-w-[100px] hidden md:table-cell">
                 <Button
                   variant="ghost"
-                  onClick={() => handleSort('created_at')}
+                  onClick={() => handleSort('createdAt')}
                   className="h-auto p-0 font-semibold touch-target"
                 >
                   Created
-                  {getSortIcon('created_at')}
+                  {getSortIcon('createdAt')}
                 </Button>
               </TableHead>
               <TableHead className="w-[70px]">Actions</TableHead>
@@ -311,12 +311,12 @@ export function GroupsTable({ groups, loading = false, onDelete }: GroupsTablePr
                     </Badge>
                   </TableCell>
                   <TableCell className="text-muted-foreground hidden md:table-cell">
-                    {formatDate(group.created_at)}
+                    {formatDate(group.createdAt)}
                   </TableCell>
                   <TableCell>
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" className="h-8 w-8 p-0 touch-target">
+                        <Button variant="ghost" className="h-8 w-8 p-0 touch-target bg-gray-800/50 hover:bg-gray-700/50 text-gray-300 hover:text-pink-400">
                           <span className="sr-only">Open menu</span>
                           <MoreHorizontal className="h-4 w-4" />
                         </Button>

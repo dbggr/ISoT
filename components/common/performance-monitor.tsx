@@ -102,7 +102,7 @@ export function PerformanceMonitor() {
           onClick={() => setIsVisible(true)}
           variant="outline"
           size="sm"
-          className="bg-background/80 backdrop-blur-sm"
+          className="bg-gray-900/90 backdrop-blur-sm border-cyan-500/30 text-cyan-400 hover:bg-cyan-500/20 hover:border-cyan-500/50 transition-all duration-200 shadow-lg"
         >
           📊 Performance
         </Button>
@@ -112,16 +112,16 @@ export function PerformanceMonitor() {
 
   return (
     <div className="fixed bottom-4 right-4 z-50 w-96 max-h-[80vh] overflow-auto">
-      <Card className="bg-background/95 backdrop-blur-sm border-2">
+      <Card className="bg-gray-900/95 backdrop-blur-sm border-2 border-cyan-500/30 shadow-2xl">
         <CardHeader className="pb-2">
           <div className="flex items-center justify-between">
-            <CardTitle className="text-sm">Performance Monitor</CardTitle>
+            <CardTitle className="text-sm text-cyan-400">Performance Monitor</CardTitle>
             <div className="flex gap-1">
               <Button
                 onClick={() => setAutoRefresh(!autoRefresh)}
                 variant={autoRefresh ? "default" : "outline"}
                 size="sm"
-                className="text-xs h-6"
+                className={`text-xs h-6 ${autoRefresh ? 'bg-cyan-500 hover:bg-cyan-600' : 'border-cyan-500/30 text-cyan-400 hover:bg-cyan-500/20 hover:border-cyan-500/50'}`}
               >
                 {autoRefresh ? "⏸️" : "▶️"}
               </Button>
@@ -129,7 +129,7 @@ export function PerformanceMonitor() {
                 onClick={() => performanceDebug.logSummary()}
                 variant="outline"
                 size="sm"
-                className="text-xs h-6"
+                className="text-xs h-6 border-cyan-500/30 text-cyan-400 hover:bg-cyan-500/20 hover:border-cyan-500/50"
               >
                 📋 Log
               </Button>
@@ -137,7 +137,7 @@ export function PerformanceMonitor() {
                 onClick={() => performanceDebug.exportData()}
                 variant="outline"
                 size="sm"
-                className="text-xs h-6"
+                className="text-xs h-6 border-cyan-500/30 text-cyan-400 hover:bg-cyan-500/20 hover:border-cyan-500/50"
               >
                 💾 Export
               </Button>
@@ -145,37 +145,37 @@ export function PerformanceMonitor() {
                 onClick={() => setIsVisible(false)}
                 variant="ghost"
                 size="sm"
-                className="text-xs h-6"
+                className="text-xs h-6 text-gray-400 hover:text-cyan-400 hover:bg-cyan-500/20"
               >
                 ✕
               </Button>
             </div>
           </div>
         </CardHeader>
-        <CardContent className="space-y-3 text-xs">
+        <CardContent className="space-y-3 text-xs text-gray-300">
           {stats && (
             <>
               {/* API Performance */}
               <div>
-                <h4 className="font-medium mb-1">API Calls</h4>
+                <h4 className="font-medium mb-1 text-cyan-400">API Calls</h4>
                 <div className="grid grid-cols-2 gap-2">
                   <div>
-                    <span className="text-muted-foreground">Count:</span>
-                    <Badge variant="secondary" className="ml-1 text-xs">
+                    <span className="text-gray-400">Count:</span>
+                    <Badge variant="secondary" className="ml-1 text-xs bg-cyan-500/20 text-cyan-400 border-cyan-500/30">
                       {stats.api.count}
                     </Badge>
                   </div>
                   <div>
-                    <span className="text-muted-foreground">Avg:</span>
-                    <Badge variant="secondary" className="ml-1 text-xs">
+                    <span className="text-gray-400">Avg:</span>
+                    <Badge variant="secondary" className="ml-1 text-xs bg-cyan-500/20 text-cyan-400 border-cyan-500/30">
                       {Math.round(stats.api.averageDuration)}ms
                     </Badge>
                   </div>
                 </div>
                 {stats.api.slowestCall && (
                   <div className="mt-1">
-                    <span className="text-muted-foreground">Slowest:</span>
-                    <Badge variant="destructive" className="ml-1 text-xs">
+                    <span className="text-gray-400">Slowest:</span>
+                    <Badge variant="destructive" className="ml-1 text-xs bg-red-500/20 text-red-400 border-red-500/30">
                       {stats.api.slowestCall.name} ({Math.round(stats.api.slowestCall.duration)}ms)
                     </Badge>
                   </div>
@@ -186,18 +186,24 @@ export function PerformanceMonitor() {
 
               {/* Cache Performance */}
               <div>
-                <h4 className="font-medium mb-1">Cache Stats</h4>
+                <h4 className="font-medium mb-1 text-cyan-400">Cache Stats</h4>
                 <div className="space-y-1">
                   {Object.entries(stats.cache).map(([key, cache]) => (
                     <div key={key} className="flex justify-between">
-                      <span className="text-muted-foreground capitalize">{key}:</span>
+                      <span className="text-gray-400 capitalize">{key}:</span>
                       <div className="flex gap-1">
-                        <Badge variant="outline" className="text-xs">
+                        <Badge variant="outline" className="text-xs bg-gray-800 text-gray-300 border-gray-600">
                           {cache.size}/{cache.maxSize}
                         </Badge>
                         <Badge 
                           variant={cache.hitRate > 0.7 ? "default" : cache.hitRate > 0.4 ? "secondary" : "destructive"}
-                          className="text-xs"
+                          className={`text-xs ${
+                            cache.hitRate > 0.7 
+                              ? 'bg-green-500/20 text-green-400 border-green-500/30' 
+                              : cache.hitRate > 0.4 
+                                ? 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30'
+                                : 'bg-red-500/20 text-red-400 border-red-500/30'
+                          }`}
                         >
                           {Math.round(cache.hitRate * 100)}% hit
                         </Badge>
@@ -213,26 +219,26 @@ export function PerformanceMonitor() {
               {stats.navigation.pageLoadTime && (
                 <>
                   <div>
-                    <h4 className="font-medium mb-1">Navigation</h4>
+                    <h4 className="font-medium mb-1 text-cyan-400">Navigation</h4>
                     <div className="space-y-1">
                       <div className="flex justify-between">
-                        <span className="text-muted-foreground">Page Load:</span>
-                        <Badge variant="secondary" className="text-xs">
+                        <span className="text-gray-400">Page Load:</span>
+                        <Badge variant="secondary" className="text-xs bg-cyan-500/20 text-cyan-400 border-cyan-500/30">
                           {Math.round(stats.navigation.pageLoadTime)}ms
                         </Badge>
                       </div>
                       {stats.navigation.firstPaint && (
                         <div className="flex justify-between">
-                          <span className="text-muted-foreground">First Paint:</span>
-                          <Badge variant="secondary" className="text-xs">
+                          <span className="text-gray-400">First Paint:</span>
+                          <Badge variant="secondary" className="text-xs bg-cyan-500/20 text-cyan-400 border-cyan-500/30">
                             {Math.round(stats.navigation.firstPaint)}ms
                           </Badge>
                         </div>
                       )}
                       {stats.navigation.firstContentfulPaint && (
                         <div className="flex justify-between">
-                          <span className="text-muted-foreground">FCP:</span>
-                          <Badge variant="secondary" className="text-xs">
+                          <span className="text-gray-400">FCP:</span>
+                          <Badge variant="secondary" className="text-xs bg-cyan-500/20 text-cyan-400 border-cyan-500/30">
                             {Math.round(stats.navigation.firstContentfulPaint)}ms
                           </Badge>
                         </div>
@@ -246,28 +252,32 @@ export function PerformanceMonitor() {
               {/* Bundle Analysis */}
               {stats.bundle.length > 0 && (
                 <div>
-                  <h4 className="font-medium mb-1">Bundle Resources</h4>
+                  <h4 className="font-medium mb-1 text-cyan-400">Bundle Resources</h4>
                   <div className="space-y-1 max-h-32 overflow-y-auto">
                     {stats.bundle.slice(0, 5).map((resource, index) => (
                       <div key={index} className="flex justify-between items-center">
-                        <span className="text-muted-foreground truncate flex-1 mr-2">
+                        <span className="text-gray-400 truncate flex-1 mr-2">
                           {resource.name}
                         </span>
                         <div className="flex gap-1">
                           <Badge 
                             variant={resource.cached ? "default" : "secondary"}
-                            className="text-xs"
+                            className={`text-xs ${
+                              resource.cached 
+                                ? 'bg-green-500/20 text-green-400 border-green-500/30' 
+                                : 'bg-cyan-500/20 text-cyan-400 border-cyan-500/30'
+                            }`}
                           >
                             {resource.cached ? "cached" : Math.round(resource.duration) + "ms"}
                           </Badge>
-                          <Badge variant="outline" className="text-xs">
+                          <Badge variant="outline" className="text-xs bg-gray-800 text-gray-300 border-gray-600">
                             {resource.type}
                           </Badge>
                         </div>
                       </div>
                     ))}
                     {stats.bundle.length > 5 && (
-                      <div className="text-center text-muted-foreground">
+                      <div className="text-center text-gray-400">
                         +{stats.bundle.length - 5} more resources
                       </div>
                     )}
@@ -280,16 +290,16 @@ export function PerformanceMonitor() {
                 <>
                   <Separator />
                   <div>
-                    <h4 className="font-medium mb-1">Components</h4>
+                    <h4 className="font-medium mb-1 text-cyan-400">Components</h4>
                     <div className="flex justify-between">
-                      <span className="text-muted-foreground">Renders:</span>
-                      <Badge variant="secondary" className="text-xs">
+                      <span className="text-gray-400">Renders:</span>
+                      <Badge variant="secondary" className="text-xs bg-cyan-500/20 text-cyan-400 border-cyan-500/30">
                         {stats.components.count}
                       </Badge>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-muted-foreground">Avg Render:</span>
-                      <Badge variant="secondary" className="text-xs">
+                      <span className="text-gray-400">Avg Render:</span>
+                      <Badge variant="secondary" className="text-xs bg-cyan-500/20 text-cyan-400 border-cyan-500/30">
                         {Math.round(stats.components.averageRenderTime)}ms
                       </Badge>
                     </div>

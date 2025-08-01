@@ -6,7 +6,7 @@ import React from 'react'
 import { render, screen } from '@testing-library/react'
 import { AppSidebar } from '@/components/layout/app-sidebar'
 import { PageHeader } from '@/components/layout/page-header'
-import { SidebarProvider } from '@/components/ui/sidebar'
+import { SidebarProvider } from '@/components/ui/sidebar-old'
 
 // Mock Next.js router
 jest.mock('next/navigation', () => ({

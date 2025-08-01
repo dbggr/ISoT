@@ -80,13 +80,13 @@ export function GlobalSearch({
       if (service.domain?.toLowerCase().includes(searchTerm)) {
         matches.push('domain')
       }
-      if (service.ip_addresses.some(ip => ip.includes(searchTerm))) {
+      if (service.ipAddress?.includes(searchTerm)) {
         matches.push('ip')
       }
-      if (service.ports.some(port => port.toString().includes(searchTerm))) {
+      if (service.internalPorts?.some(port => port.toString().includes(searchTerm))) {
         matches.push('port')
       }
-      if (service.vlan_id?.toString().includes(searchTerm)) {
+      if (service.vlan?.toString().includes(searchTerm)) {
         matches.push('vlan')
       }
 
@@ -96,7 +96,7 @@ export function GlobalSearch({
           id: service.id,
           title: service.name,
           subtitle: `${service.type} service`,
-          description: service.domain || service.ip_addresses[0] || '',
+          description: service.domain || service.ipAddress || '',
           href: `/services/${service.id}`,
           matches
         })
@@ -241,7 +241,7 @@ export function GlobalSearch({
   return (
     <div className={cn("relative", className)} ref={resultsRef}>
       <div className="relative" role="combobox" aria-expanded={isOpen} aria-haspopup="listbox">
-        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" aria-hidden="true" />
+        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" aria-hidden="true" />
         <Input
           ref={searchRef}
           id={searchId}
@@ -252,7 +252,7 @@ export function GlobalSearch({
           onChange={(e) => handleSearch(e.target.value)}
           onKeyDown={handleKeyDown}
           onFocus={() => query.length >= 2 && setIsOpen(true)}
-          className="pl-9 pr-9 keyboard-focus touch-target"
+          className="pl-9 pr-9 keyboard-focus touch-target bg-gray-800 border-gray-700 text-gray-300 placeholder:text-gray-500 focus:border-pink-500 focus:ring-pink-500/20"
           aria-label="Search services and groups"
           aria-describedby={`${searchId}-description`}
           aria-controls={isOpen ? resultsId : undefined}
@@ -267,7 +267,7 @@ export function GlobalSearch({
             variant="ghost"
             size="sm"
             onClick={handleClear}
-            className="absolute right-1 top-1/2 h-7 w-7 -translate-y-1/2 p-0 hover:bg-muted keyboard-focus touch-target-sm"
+            className="absolute right-1 top-1/2 h-7 w-7 -translate-y-1/2 p-0 hover:bg-gray-700 keyboard-focus touch-target-sm text-gray-400 hover:text-gray-300"
             aria-label="Clear search"
           >
             <X className="h-3 w-3" aria-hidden="true" />
@@ -277,11 +277,11 @@ export function GlobalSearch({
 
       {/* Search Results Dropdown */}
       {showResults && isOpen && (
-        <Card className="absolute top-full left-0 right-0 z-50 mt-1 max-h-96 overflow-hidden shadow-lg">
+        <Card className="absolute top-full left-0 right-0 z-50 mt-1 max-h-96 overflow-hidden shadow-2xl border-0 bg-gradient-to-br from-gray-900 to-gray-800">
           <CardContent className="p-0">
             {isLoading ? (
               <div 
-                className="p-4 text-center text-sm text-muted-foreground"
+                className="p-4 text-center text-sm text-gray-400"
                 role="status"
                 aria-live="polite"
               >
@@ -302,8 +302,8 @@ export function GlobalSearch({
                     aria-selected={selectedIndex === index}
                     className={cn(
                       "flex items-center gap-3 p-3 cursor-pointer transition-colors keyboard-focus touch-target",
-                      "hover:bg-muted/50",
-                      selectedIndex === index && "bg-muted"
+                      "hover:bg-gray-800/50",
+                      selectedIndex === index && "bg-gray-800"
                     )}
                     onClick={() => handleResultClick(result)}
                     onKeyDown={(e) => {
@@ -316,25 +316,25 @@ export function GlobalSearch({
                     aria-label={`${result.title}, ${result.type}, ${result.subtitle}${result.description ? `, ${result.description}` : ''}`}
                   >
                     <div 
-                      className="flex h-8 w-8 items-center justify-center rounded bg-muted"
+                      className="flex h-8 w-8 items-center justify-center rounded bg-gray-800"
                       aria-hidden="true"
                     >
                       {result.type === 'service' ? (
-                        <Server className="h-4 w-4" />
+                        <Server className="h-4 w-4 text-cyan-400" />
                       ) : (
-                        <Users className="h-4 w-4" />
+                        <Users className="h-4 w-4 text-pink-400" />
                       )}
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2">
-                        <span className="font-medium truncate">
+                        <span className="font-medium truncate text-gray-100">
                           {highlightMatch(result.title, result.matches)}
                         </span>
-                        <Badge variant="secondary" className="text-xs">
+                        <Badge variant="secondary" className="text-xs bg-gray-800 text-gray-300 border-gray-700">
                           {result.type}
                         </Badge>
                       </div>
-                      <div className="text-sm text-muted-foreground truncate">
+                      <div className="text-sm text-gray-400 truncate">
                         {result.subtitle}
                         {result.description && (
                           <>
@@ -344,14 +344,14 @@ export function GlobalSearch({
                         )}
                       </div>
                     </div>
-                    <ArrowRight className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
+                    <ArrowRight className="h-4 w-4 text-gray-500" aria-hidden="true" />
                   </div>
                 ))}
                 
                 {/* View all results link */}
                 {query.trim() && (
                   <>
-                    <Separator />
+                    <Separator className="bg-gray-700" />
                     <div className="p-2">
                       <Button
                         variant="ghost"
@@ -361,7 +361,7 @@ export function GlobalSearch({
                           setIsOpen(false)
                           onResultSelect?.()
                         }}
-                        className="w-full justify-start text-sm"
+                        className="w-full justify-start text-sm text-gray-300 hover:text-pink-400 hover:bg-gray-800/50"
                       >
                         <Search className="mr-2 h-4 w-4" />
                         View all results for "{query}"
@@ -372,7 +372,7 @@ export function GlobalSearch({
               </div>
             ) : query.length >= 2 ? (
               <div className="p-4 text-center">
-                <div className="text-sm text-muted-foreground mb-2">
+                <div className="text-sm text-gray-400 mb-2">
                   No results found for "{query}"
                 </div>
                 <Button
@@ -383,7 +383,7 @@ export function GlobalSearch({
                     setIsOpen(false)
                     onResultSelect?.()
                   }}
-                  className="text-sm"
+                  className="text-sm text-gray-300 hover:text-pink-400 hover:bg-gray-800/50"
                 >
                   <Search className="mr-2 h-4 w-4" />
                   Search in all services
