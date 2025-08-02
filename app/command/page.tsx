@@ -159,8 +159,13 @@ function TacticalStatsCard({
 }
 
 // Tactical Recent groups component
-function RecentGroups({ groups, loading }: { groups: Group[], loading: boolean }) {
+function RecentGroups({ groups, services, loading }: { groups: Group[], services: NetworkService[], loading: boolean }) {
   const recentGroups = groups.slice(0, 5) // Show only 5 most recent
+  
+  // Calculate service count for each group
+  const getServiceCount = (groupId: string) => {
+    return services.filter(service => service.groupId === groupId).length
+  }
 
   return (
     <Card className="bg-neutral-900 border-neutral-700">
@@ -202,7 +207,7 @@ function RecentGroups({ groups, loading }: { groups: Group[], loading: boolean }
                       variant="outline" 
                       className="text-xs border-orange-500/30 text-orange-500 bg-orange-500/10"
                     >
-                      {group.services?.length || 0} SERVICES
+                      {getServiceCount(group.id)} SERVICES
                     </Badge>
                   </div>
                   <p className="text-xs text-neutral-400 truncate font-mono">
@@ -323,7 +328,7 @@ export default function CommandPage() {
       {/* Main Content Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <RecentServices services={sortedServices} loading={servicesLoading} />
-        <RecentGroups groups={sortedGroups} loading={groupsLoading} />
+        <RecentGroups groups={sortedGroups} services={services} loading={groupsLoading} />
       </div>
 
       {/* Quick Actions */}

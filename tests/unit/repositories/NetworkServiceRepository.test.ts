@@ -30,7 +30,7 @@ describe('NetworkServiceRepository', () => {
 
     // Initialize database schema
     const db = getDatabase();
-    
+
     // Create tables
     db.exec(`
       CREATE TABLE IF NOT EXISTS groups (
@@ -69,7 +69,7 @@ describe('NetworkServiceRepository', () => {
 
   afterEach(async () => {
     closeDatabase();
-    
+
     // Clean up test database file
     if (fs.existsSync(testDbPath)) {
       fs.unlinkSync(testDbPath);
@@ -269,7 +269,7 @@ describe('NetworkServiceRepository', () => {
     });
 
     it('should combine multiple filters (AND logic)', async () => {
-      const filters: ServiceFilters = { 
+      const filters: ServiceFilters = {
         vlan: 'vlan-100',
         tags: ['web']
       };
@@ -458,7 +458,7 @@ describe('NetworkServiceRepository', () => {
       // This test directly manipulates the database to simulate malformed JSON
       const db = getDatabase();
       const serviceId = randomUUID();
-      
+
       db.prepare(`
         INSERT INTO network_services (
           id, group_id, name, domain, internal_ports, external_ports, tags,
@@ -477,7 +477,7 @@ describe('NetworkServiceRepository', () => {
       );
 
       const result = await repository.findById(serviceId);
-      
+
       expect(result).not.toBeNull();
       expect(result!.internalPorts).toEqual([]);
       expect(result!.externalPorts).toEqual([1, 2, 3]);
@@ -488,7 +488,7 @@ describe('NetworkServiceRepository', () => {
       // This test directly manipulates the database to simulate mixed-type arrays
       const db = getDatabase();
       const serviceId = randomUUID();
-      
+
       db.prepare(`
         INSERT INTO network_services (
           id, group_id, name, domain, internal_ports, external_ports, tags,
@@ -507,7 +507,7 @@ describe('NetworkServiceRepository', () => {
       );
 
       const result = await repository.findById(serviceId);
-      
+
       expect(result).not.toBeNull();
       expect(result!.internalPorts).toEqual([8080, 9000, 9001]);
       expect(result!.externalPorts).toEqual([80, 443]);

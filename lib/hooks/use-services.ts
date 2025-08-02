@@ -317,7 +317,7 @@ export function useBulkServiceOperations() {
       
       // Execute all update operations in parallel
       await Promise.all(ids.map(id => 
-        apiClient.updateService(id, { group_id: groupId })
+        apiClient.updateService(id, { groupId: groupId })
       ))
     } catch (err) {
       const errorMessage = getErrorMessage(err)

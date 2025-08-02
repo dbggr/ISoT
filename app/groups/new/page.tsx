@@ -1,50 +1,47 @@
 "use client"
 
-import { PageHeader } from "@/components/layout/page-header"
+import Link from "next/link"
+import { Plus, Users, Monitor, Target } from "lucide-react"
+import TemplatePage from "@/components/template/page"
 import { GroupForm } from "@/components/groups/group-form"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Users } from "lucide-react"
 
 export default function NewGroupPage() {
   return (
-    <>
-      {/* Cyberpunk Background Effects */}
-      <div className="fixed inset-0 bg-gradient-to-br from-gray-900 via-black to-gray-900 pointer-events-none" />
-      <div className="fixed inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(6,182,212,0.1),transparent_50%)] pointer-events-none" />
-      
-      <PageHeader 
-        title={
-          <div className="flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-gradient-to-r from-pink-500 to-rose-500 shadow-lg">
-              <Users className="h-6 w-6 text-white" />
-            </div>
-            <div>
-              <h1 className="text-2xl font-bold bg-gradient-to-r from-pink-400 to-rose-400 bg-clip-text text-transparent">
-                New Group
-              </h1>
-              <p className="text-sm text-gray-400">Create a new service group</p>
+    <TemplatePage
+      title="INFRASTRUCTURE"
+      sections={[
+        { id: "overview", icon: Monitor, label: "COMMAND", href: "/" },
+        { id: "groups", icon: Users, label: "GROUPS", href: "/groups" },
+        { id: "services", icon: Target, label: "SERVICES", href: "/services" },
+      ]}
+      currentSection="groups"
+      showSystemStatus={true}
+      breadcrumb="NEW"
+    >
+      {/* New Group Page Content */}
+      <div className="p-6">
+        {/* Page Header */}
+        <div className="border-b border-neutral-700 bg-neutral-800/50 backdrop-blur-sm rounded-lg mb-6">
+          <div className="px-6 py-4">
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-gradient-to-r from-orange-500 to-red-500 shadow-lg">
+                <Plus className="h-6 w-6 text-white" />
+              </div>
+              <div>
+                <h1 className="text-2xl font-bold bg-gradient-to-r from-orange-400 to-red-400 bg-clip-text text-transparent">
+                  Add New Group
+                </h1>
+                <p className="text-sm text-neutral-400">Create a new network group</p>
+              </div>
             </div>
           </div>
-        }
+        </div>
 
-      />
-      
-      <div className="flex flex-1 flex-col gap-6 container-responsive pt-0 relative z-10">
-        <Card className="border-0 bg-gradient-to-br from-gray-900 to-gray-800 shadow-2xl hover:shadow-pink-500/20 transition-all duration-300">
-          <CardHeader>
-            <CardTitle className="text-gray-100 flex items-center gap-2">
-              <Users className="h-5 w-5 text-pink-400" />
-              Group Details
-            </CardTitle>
-            <CardDescription className="text-gray-400">
-              Enter the details for the new service group
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <GroupForm mode="create" />
-          </CardContent>
-        </Card>
+        {/* Group Form */}
+        <div className="max-w-4xl">
+          <GroupForm mode="create" />
+        </div>
       </div>
-    </>
+    </TemplatePage>
   )
 }

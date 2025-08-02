@@ -1,5 +1,5 @@
 {
-  "name": "network-source-truth",
+  "name": "infra-source-truth",
   "version": "0.1.0",
   "private": true,
   "scripts": {

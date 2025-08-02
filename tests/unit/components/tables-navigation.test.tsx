@@ -7,7 +7,6 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { ServicesTable } from '@/components/services/services-table'
 import { GroupsTable } from '@/components/groups/groups-table'
-import { AppSidebar } from '@/components/layout/app-sidebar'
 import { AccessibleTable } from '@/components/common/accessible-table'
 import { useServices, useDeleteService, useBulkServiceOperations } from '@/lib/hooks/use-services'
 import { useGroups, useDeleteGroup } from '@/lib/hooks/use-groups'
@@ -434,80 +433,7 @@ describe('Table Components', () => {
 })
 
 describe('Navigation Components', () => {
-  describe('AppSidebar', () => {
-    it('renders navigation menu items', () => {
-      render(<AppSidebar />)
-      
-      expect(screen.getByText('Dashboard')).toBeInTheDocument()
-      expect(screen.getByText('Services')).toBeInTheDocument()
-      expect(screen.getByText('Groups')).toBeInTheDocument()
-    })
-
-    it('shows active state for current page', () => {
-      // Mock usePathname to return services page
-      jest.doMock('next/navigation', () => ({
-        ...jest.requireActual('next/navigation'),
-        usePathname: () => '/services'
-      }))
-      
-      render(<AppSidebar />)
-      
-      const servicesLink = screen.getByText('Services').closest('a')
-      expect(servicesLink).toHaveClass('active')
-    })
-
-    it('handles keyboard navigation', async () => {
-      const user = userEvent.setup()
-      render(<AppSidebar />)
-      
-      const dashboardLink = screen.getByText('Dashboard')
-      dashboardLink.focus()
-      
-      await user.keyboard('{ArrowDown}')
-      expect(screen.getByText('Services')).toHaveFocus()
-      
-      await user.keyboard('{ArrowDown}')
-      expect(screen.getByText('Groups')).toHaveFocus()
-    })
-
-    it('supports collapsible behavior', async () => {
-      const user = userEvent.setup()
-      render(<AppSidebar />)
-      
-      const toggleButton = screen.getByRole('button', { name: /toggle sidebar/i })
-      await user.click(toggleButton)
-      
-      const sidebar = screen.getByRole('navigation')
-      expect(sidebar).toHaveClass('collapsed')
-    })
-
-    it('provides proper ARIA labels and roles', () => {
-      render(<AppSidebar />)
-      
-      const nav = screen.getByRole('navigation')
-      expect(nav).toHaveAttribute('aria-label', 'Main navigation')
-      
-      const menuList = screen.getByRole('list')
-      expect(menuList).toBeInTheDocument()
-      
-      const menuItems = screen.getAllByRole('listitem')
-      expect(menuItems).toHaveLength(3) // Dashboard, Services, Groups
-    })
-
-    it('handles responsive behavior', () => {
-      // Mock window.innerWidth for mobile
-      Object.defineProperty(window, 'innerWidth', {
-        writable: true,
-        configurable: true,
-        value: 768,
-      })
-      
-      render(<AppSidebar />)
-      
-      const sidebar = screen.getByRole('navigation')
-      expect(sidebar).toHaveClass('mobile-responsive')
-    })
-  })
+ 
 
   describe('Breadcrumb Navigation', () => {
     it('renders breadcrumb trail', () => {

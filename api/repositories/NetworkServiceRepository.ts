@@ -26,6 +26,7 @@ interface NetworkServiceRow {
   id: string;
   group_id: string;
   name: string;
+  type: string;
   domain: string;
   internal_ports: string;
   external_ports: string;
@@ -52,6 +53,7 @@ export class SQLiteNetworkServiceRepository implements NetworkServiceRepository 
       id: row.id,
       groupId: row.group_id,
       name: row.name,
+      type: row.type as NetworkService['type'],
       domain: row.domain,
       internalPorts: this.deserializeArray(row.internal_ports),
       externalPorts: this.deserializeArray(row.external_ports),
@@ -104,11 +106,11 @@ export class SQLiteNetworkServiceRepository implements NetworkServiceRepository 
     try {
       const stmt = this.db.prepare(`
         INSERT INTO network_services (
-          id, group_id, name, domain, internal_ports, external_ports,
+          id, group_id, name, type, domain, internal_ports, external_ports,
           vlan, cidr, ip_address, tags, created_at, updated_at
         )
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        RETURNING id, group_id, name, domain, internal_ports, external_ports,
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        RETURNING id, group_id, name, type, domain, internal_ports, external_ports,
                   vlan, cidr, ip_address, tags, created_at, updated_at
       `);
 
@@ -116,6 +118,7 @@ export class SQLiteNetworkServiceRepository implements NetworkServiceRepository 
         id,
         service.groupId,
         service.name,
+        service.type,
         service.domain,
         this.serializeArray(service.internalPorts),
         this.serializeArray(service.externalPorts),
@@ -143,7 +146,7 @@ export class SQLiteNetworkServiceRepository implements NetworkServiceRepository 
   async findById(id: string): Promise<NetworkService | null> {
     try {
       const stmt = this.db.prepare(`
-        SELECT id, group_id, name, domain, internal_ports, external_ports,
+        SELECT id, group_id, name, type, domain, internal_ports, external_ports,
                vlan, cidr, ip_address, tags, created_at, updated_at
         FROM network_services
         WHERE id = ?
@@ -159,7 +162,7 @@ export class SQLiteNetworkServiceRepository implements NetworkServiceRepository 
   async findAll(filters?: ServiceFilters): Promise<NetworkService[]> {
     try {
       let query = `
-        SELECT id, group_id, name, domain, internal_ports, external_ports,
+        SELECT id, group_id, name, type, domain, internal_ports, external_ports,
                vlan, cidr, ip_address, tags, created_at, updated_at
         FROM network_services
       `;

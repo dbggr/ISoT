@@ -169,6 +169,91 @@ export class DatabaseManager {
         
         console.log('Default groups seeded successfully');
       }
+
+      // Check if services already exist
+      const serviceStmt = this.db.prepare('SELECT COUNT(*) as count FROM network_services');
+      const serviceResult = serviceStmt.get() as { count: number };
+      
+      if (serviceResult.count === 0) {
+        // Get the first group for testing
+        const groupStmt = this.db.prepare('SELECT id FROM groups LIMIT 1');
+        const group = groupStmt.get() as { id: string };
+        
+        if (group) {
+          // Insert test services
+          const insertService = this.db.prepare(`
+            INSERT OR IGNORE INTO network_services (
+              id, group_id, name, type, domain, internal_ports, external_ports, vlan, cidr, ip_address, tags
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+          `);
+          
+          const { generateUUID } = await import('../utils/uuid');
+          
+          const testServices = [
+            {
+              id: generateUUID(),
+              groupId: group.id,
+              name: 'Test Database Service',
+              type: 'database',
+              domain: 'db.test.com',
+              internalPorts: JSON.stringify([5432]),
+              externalPorts: JSON.stringify([5432]),
+              vlan: '100',
+              cidr: '10.0.1.0/24',
+              ipAddress: '10.0.1.10',
+              tags: JSON.stringify(['database', 'test'])
+            },
+            {
+              id: generateUUID(),
+              groupId: group.id,
+              name: 'Test Web Service',
+              type: 'web',
+              domain: 'web.test.com',
+              internalPorts: JSON.stringify([80, 443]),
+              externalPorts: JSON.stringify([80, 443]),
+              vlan: '200',
+              cidr: '10.0.2.0/24',
+              ipAddress: '10.0.2.10',
+              tags: JSON.stringify(['web', 'production'])
+            },
+            {
+              id: generateUUID(),
+              groupId: group.id,
+              name: 'Test API Service',
+              type: 'api',
+              domain: 'api.test.com',
+              internalPorts: JSON.stringify([3000, 8080]),
+              externalPorts: JSON.stringify([3000, 8080]),
+              vlan: '300',
+              cidr: '10.0.3.0/24',
+              ipAddress: '10.0.3.10',
+              tags: JSON.stringify(['api', 'development'])
+            }
+          ];
+          
+          const transaction = this.db.transaction(() => {
+            for (const service of testServices) {
+              insertService.run(
+                service.id,
+                service.groupId,
+                service.name,
+                service.type,
+                service.domain,
+                service.internalPorts,
+                service.externalPorts,
+                service.vlan,
+                service.cidr,
+                service.ipAddress,
+                service.tags
+              );
+            }
+          });
+          
+          transaction();
+          
+          console.log('Test services seeded successfully');
+        }
+      }
     } catch (error) {
       throw new Error(`Failed to seed default data: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }

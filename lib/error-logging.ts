@@ -83,7 +83,7 @@ class ErrorLogger {
         stack: error.stack
       },
       errorInfo: errorInfo ? {
-        componentStack: errorInfo.componentStack
+        componentStack: errorInfo.componentStack || ''
       } : undefined,
       userAgent: typeof window !== 'undefined' ? window.navigator.userAgent : 'server',
       url: typeof window !== 'undefined' ? window.location.href : 'server',

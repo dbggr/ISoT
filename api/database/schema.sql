@@ -14,6 +14,7 @@ CREATE TABLE IF NOT EXISTS network_services (
   id TEXT PRIMARY KEY,
   group_id TEXT NOT NULL,
   name TEXT NOT NULL,
+  type TEXT DEFAULT 'web', -- Service type: web, database, api, storage, security, monitoring
   domain TEXT NOT NULL,
   internal_ports TEXT, -- JSON array of port numbers
   external_ports TEXT, -- JSON array of port numbers

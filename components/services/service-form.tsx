@@ -164,7 +164,7 @@ export function ServiceForm({ mode, service, onSuccess, onCancel }: ServiceFormP
           )
         }
       }
-      formSubmission.setSuccess(isEditing ? 'Service updated successfully' : 'Service created successfully')
+      // Success message is handled by toast notification above
       if (onSuccess && result) {
         onSuccess(result)
       }
@@ -226,19 +226,8 @@ export function ServiceForm({ mode, service, onSuccess, onCancel }: ServiceFormP
   }
 
   return (
-    <Card className="card-responsive">
-      <CardHeader className="spacing-mobile">
-        <CardTitle className="text-responsive-base">
-          {isEditing ? 'Edit Service' : 'Create New Service'}
-        </CardTitle>
-        <CardDescription className="text-responsive-sm">
-          {isEditing 
-            ? 'Update the service configuration below.' 
-            : 'Fill in the details to create a new network service.'
-          }
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="spacing-mobile">
+    <Card className="bg-neutral-900 border-neutral-700">
+      <CardContent className="p-6">
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="form-responsive">
             {/* Service Name */}
@@ -247,15 +236,15 @@ export function ServiceForm({ mode, service, onSuccess, onCancel }: ServiceFormP
               name="name"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Service Name</FormLabel>
+                  <FormLabel className="text-neutral-300 tracking-wider text-sm font-medium">SERVICE NAME</FormLabel>
                   <FormControl>
                     <Input 
                       placeholder="e.g., web-server-01" 
                       {...field}
-                      className="touch-target"
+                      className="bg-neutral-800 border-neutral-700 text-white placeholder:text-neutral-500 focus:border-orange-500 focus:ring-orange-500"
                     />
                   </FormControl>
-                  <FormDescription>
+                  <FormDescription className="text-neutral-400 text-xs">
                     A unique name for this service (letters, numbers, underscores, and hyphens only)
                   </FormDescription>
                   <ValidationDisplay state={nameValidation} />
@@ -270,22 +259,22 @@ export function ServiceForm({ mode, service, onSuccess, onCancel }: ServiceFormP
               name="type"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Service Type</FormLabel>
+                  <FormLabel className="text-neutral-300 tracking-wider text-sm font-medium">SERVICE TYPE</FormLabel>
                   <Select onValueChange={field.onChange} defaultValue={field.value}>
                     <FormControl>
-                      <SelectTrigger className="touch-target">
+                      <SelectTrigger className="bg-neutral-800 border-neutral-700 text-white focus:border-orange-500">
                         <SelectValue placeholder="Select a service type" />
                       </SelectTrigger>
                     </FormControl>
-                    <SelectContent>
+                    <SelectContent className="bg-neutral-800 border-neutral-700">
                       {serviceTypes.map((type) => (
-                        <SelectItem key={type.value} value={type.value}>
-                          {type.label}
+                        <SelectItem key={type.value} value={type.value} className="text-white hover:bg-neutral-700">
+                          {type.label.toUpperCase()}
                         </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
-                  <FormDescription>
+                  <FormDescription className="text-neutral-400 text-xs">
                     The category that best describes this service
                   </FormDescription>
                   <FormMessage />
@@ -296,19 +285,7 @@ export function ServiceForm({ mode, service, onSuccess, onCancel }: ServiceFormP
             {/* IP Addresses */}
             <div className="space-y-4">
               <div className="flex items-center justify-between">
-                <FormLabel>IP Addresses</FormLabel>
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={() => {}} // No add button for IP addresses
-                  disabled={false} // No limit for IP addresses
-                  className="touch-target"
-                >
-                  <Plus className="h-4 w-4 mr-2" />
-                  <span className="hidden sm:inline">Add IP</span>
-                  <span className="sm:hidden">Add</span>
-                </Button>
+                <FormLabel className="text-neutral-300 tracking-wider text-sm font-medium">IP ADDRESS</FormLabel>
               </div>
               <div className="space-y-2">
                 <div className="flex items-center space-x-2">
@@ -316,12 +293,12 @@ export function ServiceForm({ mode, service, onSuccess, onCancel }: ServiceFormP
                     placeholder="192.168.1.100"
                     value={watchedIpAddress}
                     onChange={(e) => form.setValue('ipAddress', e.target.value)}
-                    className="touch-target"
+                    className="bg-neutral-800 border-neutral-700 text-white placeholder:text-neutral-500 focus:border-orange-500 focus:ring-orange-500 font-mono"
                   />
                 </div>
               </div>
-              <FormDescription>
-                IPv4 addresses where this service is accessible (maximum 10)
+              <FormDescription className="text-neutral-400 text-xs">
+                IPv4 address where this service is accessible
               </FormDescription>
               <ValidationDisplay state={ipValidation} />
             </div>
@@ -329,14 +306,14 @@ export function ServiceForm({ mode, service, onSuccess, onCancel }: ServiceFormP
             {/* Ports */}
             <div className="space-y-4">
               <div className="flex items-center justify-between">
-                <FormLabel>Internal Ports</FormLabel>
+                <FormLabel className="text-neutral-300 tracking-wider text-sm font-medium">INTERNAL PORTS</FormLabel>
                 <Button
                   type="button"
                   variant="outline"
                   size="sm"
                   onClick={handleAddInternalPort}
                   disabled={internalPorts.length >= 50}
-                  className="touch-target"
+                  className="bg-neutral-800 border-neutral-700 text-orange-400 hover:bg-orange-500/20 hover:border-orange-500/70"
                 >
                   <Plus className="h-4 w-4 mr-2" />
                   <span className="hidden sm:inline">Add Port</span>
@@ -353,7 +330,7 @@ export function ServiceForm({ mode, service, onSuccess, onCancel }: ServiceFormP
                       max="65535"
                       value={port}
                       onChange={(e) => handleInternalPortChange(index, parseInt(e.target.value) || 0)}
-                      className="touch-target"
+                      className="bg-neutral-800 border-neutral-700 text-white placeholder:text-neutral-500 focus:border-orange-500 focus:ring-orange-500 font-mono"
                     />
                     {internalPorts.length > 1 && (
                       <Button
@@ -361,7 +338,7 @@ export function ServiceForm({ mode, service, onSuccess, onCancel }: ServiceFormP
                         variant="outline"
                         size="sm"
                         onClick={() => handleRemoveInternalPort(index)}
-                        className="touch-target"
+                        className="bg-neutral-800 border-neutral-700 text-red-400 hover:bg-red-500/20 hover:border-red-500/70"
                       >
                         <X className="h-4 w-4" />
                       </Button>
@@ -369,7 +346,7 @@ export function ServiceForm({ mode, service, onSuccess, onCancel }: ServiceFormP
                   </div>
                 ))}
               </div>
-              <FormDescription>
+              <FormDescription className="text-neutral-400 text-xs">
                 Port numbers where this service listens (1-65535, maximum 50)
               </FormDescription>
               <ValidationDisplay state={internalPortArrayValidation} />
@@ -378,14 +355,14 @@ export function ServiceForm({ mode, service, onSuccess, onCancel }: ServiceFormP
             {/* External Ports */}
             <div className="space-y-4">
               <div className="flex items-center justify-between">
-                <FormLabel>External Ports</FormLabel>
+                <FormLabel className="text-neutral-300 tracking-wider text-sm font-medium">EXTERNAL PORTS</FormLabel>
                 <Button
                   type="button"
                   variant="outline"
                   size="sm"
                   onClick={handleAddExternalPort}
                   disabled={externalPorts.length >= 50}
-                  className="touch-target"
+                  className="bg-neutral-800 border-neutral-700 text-orange-400 hover:bg-orange-500/20 hover:border-orange-500/70"
                 >
                   <Plus className="h-4 w-4 mr-2" />
                   <span className="hidden sm:inline">Add Port</span>
@@ -402,7 +379,7 @@ export function ServiceForm({ mode, service, onSuccess, onCancel }: ServiceFormP
                       max="65535"
                       value={port}
                       onChange={(e) => handleExternalPortChange(index, parseInt(e.target.value) || 0)}
-                      className="touch-target"
+                      className="bg-neutral-800 border-neutral-700 text-white placeholder:text-neutral-500 focus:border-orange-500 focus:ring-orange-500 font-mono"
                     />
                     {externalPorts.length > 1 && (
                       <Button
@@ -410,7 +387,7 @@ export function ServiceForm({ mode, service, onSuccess, onCancel }: ServiceFormP
                         variant="outline"
                         size="sm"
                         onClick={() => handleRemoveExternalPort(index)}
-                        className="touch-target"
+                        className="bg-neutral-800 border-neutral-700 text-red-400 hover:bg-red-500/20 hover:border-red-500/70"
                       >
                         <X className="h-4 w-4" />
                       </Button>
@@ -418,7 +395,7 @@ export function ServiceForm({ mode, service, onSuccess, onCancel }: ServiceFormP
                   </div>
                 ))}
               </div>
-              <FormDescription>
+              <FormDescription className="text-neutral-400 text-xs">
                 Port numbers where this service is accessible (1-65535, maximum 50)
               </FormDescription>
               <ValidationDisplay state={externalPortArrayValidation} />
@@ -430,7 +407,7 @@ export function ServiceForm({ mode, service, onSuccess, onCancel }: ServiceFormP
               name="vlan"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>VLAN ID (Optional)</FormLabel>
+                  <FormLabel className="text-neutral-300 tracking-wider text-sm font-medium">VLAN ID (OPTIONAL)</FormLabel>
                   <FormControl>
                     <Input
                       type="number"
@@ -440,10 +417,10 @@ export function ServiceForm({ mode, service, onSuccess, onCancel }: ServiceFormP
                       {...field}
                       onChange={(e) => field.onChange(e.target.value ? parseInt(e.target.value) : undefined)}
                       value={field.value || ''}
-                      className="touch-target"
+                      className="bg-neutral-800 border-neutral-700 text-white placeholder:text-neutral-500 focus:border-orange-500 focus:ring-orange-500 font-mono"
                     />
                   </FormControl>
-                  <FormDescription>
+                  <FormDescription className="text-neutral-400 text-xs">
                     VLAN identifier for network segmentation (1-4094)
                   </FormDescription>
                   <ValidationDisplay state={vlanValidation} />
@@ -458,15 +435,15 @@ export function ServiceForm({ mode, service, onSuccess, onCancel }: ServiceFormP
               name="domain"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Domain (Optional)</FormLabel>
+                  <FormLabel className="text-neutral-300 tracking-wider text-sm font-medium">DOMAIN (OPTIONAL)</FormLabel>
                   <FormControl>
                     <Input
                       placeholder="example.com"
                       {...field}
-                      className="touch-target"
+                      className="bg-neutral-800 border-neutral-700 text-white placeholder:text-neutral-500 focus:border-orange-500 focus:ring-orange-500 font-mono"
                     />
                   </FormControl>
-                  <FormDescription>
+                  <FormDescription className="text-neutral-400 text-xs">
                     Domain name associated with this service
                   </FormDescription>
                   <ValidationDisplay state={domainValidation} />
@@ -481,28 +458,28 @@ export function ServiceForm({ mode, service, onSuccess, onCancel }: ServiceFormP
               name="groupId"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Group</FormLabel>
+                  <FormLabel className="text-neutral-300 tracking-wider text-sm font-medium">GROUP</FormLabel>
                   <Select onValueChange={field.onChange} defaultValue={field.value}>
                     <FormControl>
-                      <SelectTrigger className="touch-target">
+                      <SelectTrigger className="bg-neutral-800 border-neutral-700 text-white focus:border-orange-500">
                         <SelectValue placeholder="Select a group" />
                       </SelectTrigger>
                     </FormControl>
-                    <SelectContent>
+                    <SelectContent className="bg-neutral-800 border-neutral-700">
                       {groupsLoading ? (
-                        <SelectItem value="loading" disabled>
+                        <SelectItem value="loading" disabled className="text-neutral-400">
                           Loading groups...
                         </SelectItem>
                       ) : (
                         groups.map((group) => (
-                          <SelectItem key={group.id} value={group.id}>
-                            {group.name}
+                          <SelectItem key={group.id} value={group.id} className="text-white hover:bg-neutral-700">
+                            {group.name.toUpperCase()}
                           </SelectItem>
                         ))
                       )}
                     </SelectContent>
                   </Select>
-                  <FormDescription>
+                  <FormDescription className="text-neutral-400 text-xs">
                     The group this service belongs to
                   </FormDescription>
                   <FormMessage />
@@ -514,30 +491,30 @@ export function ServiceForm({ mode, service, onSuccess, onCancel }: ServiceFormP
             <FormSubmissionFeedback state={formSubmission.state} />
 
             {/* Form Actions - Mobile Responsive */}
-            <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-end space-y-2 sm:space-y-0 sm:space-x-2 pt-4">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-end space-y-2 sm:space-y-0 sm:space-x-2 pt-6 border-t border-neutral-700">
               {onCancel && (
                 <Button
                   type="button"
                   variant="outline"
                   onClick={handleCancel}
                   disabled={isLoading}
-                  className="touch-target w-full sm:w-auto"
+                  className="bg-neutral-800 border-neutral-700 text-neutral-300 hover:bg-neutral-700 hover:text-white w-full sm:w-auto"
                 >
-                  Cancel
+                  CANCEL
                 </Button>
               )}
               <Button
                 type="submit"
                 disabled={isLoading || groupsLoading || formSubmission.state.isSubmitting}
-                className="touch-target w-full sm:w-auto"
+                className="bg-orange-500 hover:bg-orange-600 text-white border-orange-500 w-full sm:w-auto font-medium tracking-wider"
               >
                 {(isLoading || formSubmission.state.isSubmitting) ? (
                   <>
-                    {isEditing ? 'Updating...' : 'Creating...'}
+                    {isEditing ? 'UPDATING...' : 'CREATING...'}
                   </>
                 ) : (
                   <>
-                    {isEditing ? 'Update Service' : 'Create Service'}
+                    {isEditing ? 'UPDATE SERVICE' : 'CREATE SERVICE'}
                   </>
                 )}
               </Button>

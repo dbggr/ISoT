@@ -14,7 +14,6 @@ This document provides comprehensive documentation for all components in the Net
 
 ## Layout Components
 
-### AppSidebar (`components/layout/app-sidebar.tsx`)
 
 The main navigation sidebar component using shadcn/ui Sidebar components.
 
@@ -27,44 +26,6 @@ The main navigation sidebar component using shadcn/ui Sidebar components.
 - Touch-friendly mobile interactions
 - Keyboard navigation support
 
-**Usage:**
-```tsx
-import { AppSidebar } from '@/components/layout/app-sidebar'
-
-<SidebarProvider>
-  <AppSidebar />
-  <SidebarInset>
-    {/* Main content */}
-  </SidebarInset>
-</SidebarProvider>
-```
-
-### PageHeader (`components/layout/page-header.tsx`)
-
-Standardized page header with title, description, and action buttons.
-
-**Props:**
-```tsx
-interface PageHeaderProps {
-  title: string
-  description?: string
-  action?: React.ReactNode
-  breadcrumbs?: Array<{ label: string; href?: string }>
-}
-```
-
-**Usage:**
-```tsx
-<PageHeader 
-  title="Services"
-  description="Manage network services and their configurations"
-  action={
-    <Button asChild>
-      <Link href="/services/new">Add Service</Link>
-    </Button>
-  }
-/>
-```
 
 ## Data Display Components
 

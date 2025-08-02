@@ -8,28 +8,19 @@ import {
   Edit, 
   Trash2, 
   Search,
-  ArrowUpDown,
-  ArrowUp,
-  ArrowDown
+  X
 } from "lucide-react"
 
-import { Button } from "@/components/ui/button"
+import { TacticalTable, TacticalTableColumn } from "@/components/tactical/tactical-table"
+import { TacticalButton } from "@/components/tactical/tactical-button"
+import { Input } from "@/components/ui/input"
+import { Badge } from "@/components/ui/badge"
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table"
-import { Input } from "@/components/ui/input"
-import { Badge } from "@/components/ui/badge"
 import { NetworkService } from "@/lib/types"
 
 interface GroupServicesTableProps {
@@ -38,312 +29,200 @@ interface GroupServicesTableProps {
   onDelete?: (service: NetworkService) => void
 }
 
-type SortField = 'name' | 'type' | 'createdAt'
-type SortDirection = 'asc' | 'desc'
-
 export function GroupServicesTable({ services, loading = false, onDelete }: GroupServicesTableProps) {
-  const [searchTerm, setSearchTerm] = useState("")
-  const [sortField, setSortField] = useState<SortField>('name')
-  const [sortDirection, setSortDirection] = useState<SortDirection>('asc')
+  const [filters, setFilters] = useState({
+    search: '',
+  })
 
   // Filter services based on search term
   const filteredServices = useMemo(() => {
-    if (!searchTerm) return services
+    if (!filters.search) return services
 
-    const term = searchTerm.toLowerCase()
+    const term = filters.search.toLowerCase()
     return services.filter(service => 
-      service.name.toLowerCase().includes(term) ||
-      service.type.toLowerCase().includes(term) ||
+      service.name?.toLowerCase().includes(term) ||
+      service.type?.toLowerCase().includes(term) ||
       (service.domain && service.domain.toLowerCase().includes(term)) ||
       service.ipAddress?.includes(term)
     )
-  }, [services, searchTerm])
-
-  // Sort filtered services
-  const sortedServices = useMemo(() => {
-    return [...filteredServices].sort((a, b) => {
-      let aValue: string | number
-      let bValue: string | number
-
-      switch (sortField) {
-        case 'name':
-          aValue = a.name.toLowerCase()
-          bValue = b.name.toLowerCase()
-          break
-        case 'type':
-          aValue = a.type.toLowerCase()
-          bValue = b.type.toLowerCase()
-          break
-        case 'createdAt':
-          aValue = new Date(a.createdAt).getTime()
-          bValue = new Date(b.createdAt).getTime()
-          break
-        default:
-          aValue = a.name.toLowerCase()
-          bValue = b.name.toLowerCase()
-      }
-
-      if (aValue < bValue) return sortDirection === 'asc' ? -1 : 1
-      if (aValue > bValue) return sortDirection === 'asc' ? 1 : -1
-      return 0
-    })
-  }, [filteredServices, sortField, sortDirection])
-
-  const handleSort = (field: SortField) => {
-    if (sortField === field) {
-      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc')
-    } else {
-      setSortField(field)
-      setSortDirection('asc')
-    }
-  }
-
-  const getSortIcon = (field: SortField) => {
-    if (sortField !== field) {
-      return <ArrowUpDown className="ml-2 h-4 w-4" />
-    }
-    return sortDirection === 'asc' 
-      ? <ArrowUp className="ml-2 h-4 w-4" />
-      : <ArrowDown className="ml-2 h-4 w-4" />
-  }
+  }, [services, filters.search])
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric'
+    return new Date(dateString).toLocaleDateString('en-GB', {
+      day: '2-digit',
+      month: '2-digit', 
+      year: 'numeric'
     })
   }
 
-  const getServiceTypeBadgeVariant = (type: NetworkService['type']) => {
-    switch (type) {
-      case 'web':
-        return 'default'
-      case 'database':
-        return 'secondary'
-      case 'api':
-        return 'outline'
-      case 'storage':
-        return 'secondary'
-      case 'security':
-        return 'destructive'
-      case 'monitoring':
-        return 'outline'
-      default:
-        return 'secondary'
+  // Define tactical table columns
+  const tacticalColumns: TacticalTableColumn<NetworkService>[] = [
+    {
+      key: 'name',
+      header: 'Service Name',
+      headerClassName: 'min-w-[150px]',
+      render: (name, service) => (
+        <Link 
+          href={`/services/${service.id}`}
+          className="text-orange-400 hover:text-orange-300 hover:underline font-mono font-medium transition-colors duration-200"
+        >
+          {name}
+        </Link>
+      )
+    },
+    {
+      key: 'type',
+      header: 'Type',
+      headerClassName: 'w-[100px]',
+      render: (type) => (
+        <Badge className="bg-orange-500/20 text-orange-500 border-orange-500/30 font-mono">
+          {type ? type.toUpperCase() : 'UNKNOWN'}
+        </Badge>
+      )
+    },
+    {
+      key: 'ipAddress',
+      header: 'IP Address',
+      headerClassName: 'min-w-[140px]',
+      render: (ipAddress) => (
+        <span className="text-neutral-300 font-mono text-sm">
+          {ipAddress || '-'}
+        </span>
+      )
+    },
+    {
+      key: 'internalPorts',
+      header: 'Ports',
+      headerClassName: 'min-w-[120px]',
+      render: (internalPorts) => (
+        <div className="flex flex-wrap gap-1">
+          {internalPorts?.slice(0, 3).map((port: number, index: number) => (
+            <Badge key={index} className="bg-neutral-800 border-neutral-700 text-white font-mono text-xs">
+              {port}
+            </Badge>
+          ))}
+          {internalPorts && internalPorts.length > 3 && (
+            <Badge className="bg-neutral-800 border-neutral-700 text-neutral-400 font-mono text-xs">
+              +{internalPorts.length - 3}
+            </Badge>
+          )}
+          {(!internalPorts || internalPorts.length === 0) && (
+            <span className="text-neutral-400 text-sm">-</span>
+          )}
+        </div>
+      )
+    },
+    {
+      key: 'domain',
+      header: 'Domain',
+      headerClassName: 'min-w-[140px]',
+      render: (domain) => (
+        <span className="text-neutral-300 font-mono text-sm">
+          {domain || '-'}
+        </span>
+      )
+    },
+    {
+      key: 'createdAt',
+      header: 'Created',
+      headerClassName: 'w-[120px]',
+      render: (createdAt) => (
+        <span className="text-neutral-400 font-mono text-sm">
+          {formatDate(createdAt)}
+        </span>
+      )
+    },
+    {
+      key: 'actions',
+      header: 'Actions',
+      headerClassName: 'w-[80px]',
+      render: (_, service) => (
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <TacticalButton
+              variant="ghost"
+              size="sm"
+              className="h-8 w-8 p-0 text-neutral-400 hover:text-orange-500 hover:bg-orange-500/20"
+            >
+              <span className="sr-only">Open menu</span>
+              <MoreHorizontal className="h-4 w-4" />
+            </TacticalButton>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-40 bg-neutral-800 border-neutral-700">
+            <DropdownMenuItem asChild>
+              <Link href={`/services/${service.id}`} className="text-white hover:bg-neutral-700">
+                <Eye className="mr-2 h-4 w-4" />
+                VIEW
+              </Link>
+            </DropdownMenuItem>
+            <DropdownMenuItem asChild>
+              <Link href={`/services/${service.id}/edit`} className="text-white hover:bg-neutral-700">
+                <Edit className="mr-2 h-4 w-4" />
+                EDIT
+              </Link>
+            </DropdownMenuItem>
+            {onDelete && (
+              <DropdownMenuItem 
+                onClick={() => onDelete(service)}
+                className="text-red-400 hover:bg-red-500/20 hover:text-red-300"
+              >
+                <Trash2 className="mr-2 h-4 w-4" />
+                DELETE
+              </DropdownMenuItem>
+            )}
+          </DropdownMenuContent>
+        </DropdownMenu>
+      )
     }
-  }
+  ]
 
+  // Loading skeleton
   if (loading) {
     return (
-      <div className="space-y-4">
-        <div className="flex items-center space-x-2">
-          <Search className="h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Search services..."
-            className="max-w-sm"
-            disabled
-          />
-        </div>
-        <div className="rounded-md border">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Name</TableHead>
-                <TableHead>Type</TableHead>
-                <TableHead>IP Addresses</TableHead>
-                <TableHead>Ports</TableHead>
-                <TableHead>Domain</TableHead>
-                <TableHead>Created</TableHead>
-                <TableHead className="w-[70px]"></TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {[...Array(3)].map((_, i) => (
-                <TableRow key={i}>
-                  <TableCell>
-                    <div className="h-4 bg-muted animate-pulse rounded" />
-                  </TableCell>
-                  <TableCell>
-                    <div className="h-4 bg-muted animate-pulse rounded w-16" />
-                  </TableCell>
-                  <TableCell>
-                    <div className="h-4 bg-muted animate-pulse rounded" />
-                  </TableCell>
-                  <TableCell>
-                    <div className="h-4 bg-muted animate-pulse rounded w-20" />
-                  </TableCell>
-                  <TableCell>
-                    <div className="h-4 bg-muted animate-pulse rounded" />
-                  </TableCell>
-                  <TableCell>
-                    <div className="h-4 bg-muted animate-pulse rounded w-20" />
-                  </TableCell>
-                  <TableCell>
-                    <div className="h-8 bg-muted animate-pulse rounded w-8" />
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </div>
-      </div>
+      <TacticalTable
+        data={[]}
+        columns={tacticalColumns}
+        loading={true}
+        emptyMessage="Loading services data..."
+      />
     )
   }
 
   return (
-    <div className="space-y-4">
-      {/* Search */}
-      <div className="flex items-center space-x-2">
-        <Search className="h-4 w-4 text-muted-foreground" />
-        <Input
-          placeholder="Search services..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="max-w-sm"
-        />
+    <div className="space-y-6">
+      {/* Tactical Search Controls */}
+      <div className="bg-neutral-900 border border-neutral-700 rounded-lg p-4">
+        <div className="flex flex-col gap-4">
+          {/* Local Search Bar for Services */}
+          <div className="relative w-full">
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-400" />
+            <Input
+              placeholder="SEARCH SERVICES IN THIS GROUP..."
+              value={filters.search}
+              onChange={(e) => setFilters(prev => ({ ...prev, search: e.target.value }))}
+              className="pl-9 bg-neutral-800 border-neutral-700 text-white placeholder:text-neutral-500 focus:border-orange-500 focus:ring-orange-500"
+            />
+            {filters.search && (
+              <TacticalButton
+                variant="ghost"
+                size="sm"
+                onClick={() => setFilters(prev => ({ ...prev, search: '' }))}
+                className="absolute right-1 top-1/2 h-7 w-7 -translate-y-1/2 p-0"
+              >
+                <X className="h-3 w-3" />
+              </TacticalButton>
+            )}
+          </div>
+        </div>
       </div>
 
-      {/* Table */}
-      <div className="rounded-md border">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>
-                <Button
-                  variant="ghost"
-                  onClick={() => handleSort('name')}
-                  className="h-auto p-0 font-semibold"
-                >
-                  Name
-                  {getSortIcon('name')}
-                </Button>
-              </TableHead>
-              <TableHead>
-                <Button
-                  variant="ghost"
-                  onClick={() => handleSort('type')}
-                  className="h-auto p-0 font-semibold"
-                >
-                  Type
-                  {getSortIcon('type')}
-                </Button>
-              </TableHead>
-              <TableHead>IP Addresses</TableHead>
-              <TableHead>Ports</TableHead>
-              <TableHead>Domain</TableHead>
-              <TableHead>
-                <Button
-                  variant="ghost"
-                  onClick={() => handleSort('createdAt')}
-                  className="h-auto p-0 font-semibold"
-                >
-                  Created
-                  {getSortIcon('createdAt')}
-                </Button>
-              </TableHead>
-              <TableHead className="w-[70px]"></TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {sortedServices.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={7} className="text-center py-8">
-                  {searchTerm ? (
-                    <div className="text-muted-foreground">
-                      No services found matching "{searchTerm}"
-                    </div>
-                  ) : (
-                    <div className="text-muted-foreground">
-                      No services found in this group.
-                    </div>
-                  )}
-                </TableCell>
-              </TableRow>
-            ) : (
-              sortedServices.map((service) => (
-                <TableRow key={service.id}>
-                  <TableCell className="font-medium">
-                    <Link 
-                      href={`/services/${service.id}`}
-                      className="hover:underline"
-                    >
-                      {service.name}
-                    </Link>
-                  </TableCell>
-                  <TableCell>
-                    <Badge variant={getServiceTypeBadgeVariant(service.type)}>
-                      {service.type}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex flex-wrap gap-1">
-                      {service.ipAddress && (
-                        <Badge variant="outline" className="text-xs">
-                          {service.ipAddress}
-                        </Badge>
-                      )}
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex flex-wrap gap-1">
-                      {service.internalPorts?.slice(0, 3).map((port, index) => (
-                        <Badge key={index} variant="outline" className="text-xs">
-                          {port}
-                        </Badge>
-                      ))}
-                      {service.internalPorts && service.internalPorts.length > 3 && (
-                        <Badge variant="outline" className="text-xs">
-                          +{service.internalPorts.length - 3} more
-                        </Badge>
-                      )}
-                    </div>
-                  </TableCell>
-                  <TableCell className="text-muted-foreground">
-                    {service.domain || '-'}
-                  </TableCell>
-                  <TableCell className="text-muted-foreground">
-                    {formatDate(service.createdAt)}
-                  </TableCell>
-                  <TableCell>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" className="h-8 w-8 p-0">
-                          <span className="sr-only">Open menu</span>
-                          <MoreHorizontal className="h-4 w-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem asChild>
-                          <Link href={`/services/${service.id}`}>
-                            <Eye className="mr-2 h-4 w-4" />
-                            View
-                          </Link>
-                        </DropdownMenuItem>
-                        <DropdownMenuItem asChild>
-                          <Link href={`/services/${service.id}/edit`}>
-                            <Edit className="mr-2 h-4 w-4" />
-                            Edit
-                          </Link>
-                        </DropdownMenuItem>
-                        {onDelete && (
-                          <DropdownMenuItem 
-                            onClick={() => onDelete(service)}
-                            className="text-destructive"
-                          >
-                            <Trash2 className="mr-2 h-4 w-4" />
-                            Delete
-                          </DropdownMenuItem>
-                        )}
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </TableCell>
-                </TableRow>
-              ))
-            )}
-          </TableBody>
-        </Table>
-      </div>
+      {/* Tactical Table */}
+      <TacticalTable
+        data={filteredServices}
+        columns={tacticalColumns}
+        loading={loading}
+        emptyMessage={filters.search ? "NO SERVICES MATCH YOUR SEARCH CRITERIA" : "NO SERVICES FOUND IN THIS GROUP"}
+      />
     </div>
   )
 }

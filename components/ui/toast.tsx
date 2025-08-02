@@ -4,6 +4,7 @@ import * as React from "react"
 import { X, CheckCircle, AlertCircle, AlertTriangle, Info } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "./button"
+import { useToast } from "@/hooks/use-toast"
 
 export interface ToastProps {
   id: string
@@ -29,28 +30,28 @@ export function Toast({
   const getVariantStyles = () => {
     switch (variant) {
       case 'destructive':
-        return "border-destructive bg-destructive text-destructive-foreground"
+        return "border-red-500/30 bg-red-500/10 text-red-400 border backdrop-blur-sm"
       case 'success':
-        return "border-green-200 bg-green-50 text-green-800 border"
+        return "border-green-500/30 bg-green-500/10 text-green-400 border backdrop-blur-sm"
       case 'warning':
-        return "border-yellow-200 bg-yellow-50 text-yellow-800 border"
+        return "border-orange-500/30 bg-orange-500/10 text-orange-400 border backdrop-blur-sm"
       case 'info':
-        return "border-blue-200 bg-blue-50 text-blue-800 border"
+        return "border-orange-500/30 bg-orange-500/10 text-orange-400 border backdrop-blur-sm"
       default:
-        return "border bg-background text-foreground"
+        return "border-neutral-700 bg-neutral-900 text-white border backdrop-blur-sm"
     }
   }
 
   const getIcon = () => {
     switch (variant) {
       case 'destructive':
-        return <AlertCircle className="h-4 w-4" />
+        return <AlertCircle className="h-4 w-4 text-red-500" />
       case 'success':
-        return <CheckCircle className="h-4 w-4 text-green-600" />
+        return <CheckCircle className="h-4 w-4 text-green-500" />
       case 'warning':
-        return <AlertTriangle className="h-4 w-4 text-yellow-600" />
+        return <AlertTriangle className="h-4 w-4 text-orange-500" />
       case 'info':
-        return <Info className="h-4 w-4 text-blue-600" />
+        return <Info className="h-4 w-4 text-orange-500" />
       default:
         return null
     }
@@ -69,7 +70,7 @@ export function Toast({
         </div>
       )}
       <div className="grid gap-1 flex-1">
-        <div className="text-sm font-semibold">{title}</div>
+        <div className="text-sm font-semibold tracking-wider uppercase">{title}</div>
         {description && (
           <div className="text-sm opacity-90">{description}</div>
         )}
@@ -78,17 +79,23 @@ export function Toast({
             variant="outline"
             size="sm"
             onClick={action.onClick}
-            className="mt-2 h-8 w-fit"
+            className="mt-2 h-8 w-fit bg-neutral-800 border-neutral-700 text-neutral-300 hover:bg-neutral-700 hover:text-white"
           >
-            {action.label}
+            {action.label.toUpperCase()}
           </Button>
         )}
       </div>
       <Button
         size="sm"
         variant="ghost"
-        className="absolute right-2 top-2 h-6 w-6 p-0 opacity-70 hover:opacity-100"
-        onClick={() => onClose(id)}
+        className="absolute right-2 top-2 h-6 w-6 p-0 text-neutral-400 hover:text-white hover:bg-neutral-800 transition-colors duration-200 z-10 cursor-pointer"
+        onClick={(e) => {
+          e.preventDefault()
+          e.stopPropagation()
+          console.log('Toast close clicked:', id) // Debug log
+          onClose(id)
+        }}
+        aria-label="Close notification"
       >
         <X className="h-4 w-4" />
       </Button>
@@ -102,7 +109,7 @@ export function Toaster() {
   return (
     <div className="fixed bottom-0 right-0 z-[100] flex max-h-screen w-full flex-col-reverse p-4 sm:bottom-0 sm:right-0 sm:top-auto sm:flex-col md:max-w-[420px]">
       {toasts.map((toast) => (
-        <Toast
+        <ToastWithTimer
           key={toast.id}
           {...toast}
           onClose={dismiss}
@@ -112,5 +119,18 @@ export function Toaster() {
   )
 }
 
-// Import the hook
-import { useToast } from "@/hooks/use-toast"
+// Individual toast component with its own timer
+function ToastWithTimer(props: ToastProps) {
+  React.useEffect(() => {
+    if (props.duration && props.duration > 0) {
+      const timer = setTimeout(() => {
+        props.onClose(props.id)
+      }, props.duration)
+      
+      return () => clearTimeout(timer)
+    }
+  }, [props.id, props.duration, props.onClose])
+
+  return <Toast {...props} />
+}
+

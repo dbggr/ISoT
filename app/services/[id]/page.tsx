@@ -2,13 +2,12 @@
 
 import { useParams, useRouter } from "next/navigation"
 import Link from "next/link"
-import { ArrowLeft, Edit, Trash2, Globe, Network, Server, Shield } from "lucide-react"
-
+import { ArrowLeft, Edit, Trash2, Globe, Network, Server, Shield, Monitor, Target, Users, Eye } from "lucide-react"
+import TemplatePage from "@/components/template/page"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Skeleton } from "@/components/ui/skeleton"
-import { PageHeader } from "@/components/layout/page-header"
 import { useService, useDeleteService } from "@/lib/hooks/use-services"
 import { useGroups } from "@/lib/hooks/use-groups"
 import { NetworkService } from "@/lib/types"
@@ -37,7 +36,7 @@ export default function ServiceDetailPage() {
   const deleteService = useDeleteService()
 
   // Find the group for this service
-  const serviceGroup = groups.find(group => group.id === service?.group_id)
+  const serviceGroup = groups.find(group => group.id === service?.groupId)
 
   const handleDelete = async () => {
     if (!service) return
@@ -68,15 +67,42 @@ export default function ServiceDetailPage() {
   // Loading state
   if (serviceLoading || groupsLoading) {
     return (
-      <>
-        <PageHeader />
-        <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
-          <div className="flex items-center gap-2 mb-4">
-            <Skeleton className="h-10 w-20" />
-            <Skeleton className="h-6 w-32" />
+      <TemplatePage
+        title="INFRASTRUCTURE"
+        sections={[
+          { id: "overview", icon: Monitor, label: "COMMAND", href: "/" },
+          { id: "groups", icon: Users, label: "GROUPS", href: "/groups" },
+          { id: "services", icon: Target, label: "SERVICES", href: "/services" },
+        ]}
+        currentSection="services"
+        showSystemStatus={true}
+        breadcrumb="VIEW"
+      >
+        <div className="p-6">
+          {/* Loading Header */}
+          <div className="border-b border-neutral-700 bg-neutral-800/50 backdrop-blur-sm rounded-lg mb-6">
+            <div className="px-6 py-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 rounded-lg bg-gradient-to-r from-orange-500 to-red-500 shadow-lg">
+                    <Eye className="h-6 w-6 text-white" />
+                  </div>
+                  <div>
+                    <Skeleton className="h-8 w-48 mb-2" />
+                    <Skeleton className="h-4 w-32" />
+                  </div>
+                </div>
+                <div className="flex gap-2">
+                  <Skeleton className="h-10 w-20" />
+                  <Skeleton className="h-10 w-20" />
+                </div>
+              </div>
+            </div>
           </div>
+
+          {/* Loading Content */}
           <div className="grid gap-6 md:grid-cols-2">
-            <Card>
+            <Card className="bg-neutral-900 border-neutral-700">
               <CardHeader>
                 <Skeleton className="h-6 w-32" />
               </CardHeader>
@@ -86,7 +112,7 @@ export default function ServiceDetailPage() {
                 <Skeleton className="h-4 w-1/2" />
               </CardContent>
             </Card>
-            <Card>
+            <Card className="bg-neutral-900 border-neutral-700">
               <CardHeader>
                 <Skeleton className="h-6 w-40" />
               </CardHeader>
@@ -97,120 +123,178 @@ export default function ServiceDetailPage() {
             </Card>
           </div>
         </div>
-      </>
+      </TemplatePage>
     )
   }
 
   // Error state
   if (serviceError || !service) {
     return (
-      <>
-        <PageHeader title="Service Not Found" />
-        <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
-          <Card>
-            <CardContent className="flex flex-col items-center justify-center py-12">
-              <div className="text-center">
-                <h3 className="text-lg font-semibold mb-2">Service Not Found</h3>
-                <p className="text-muted-foreground mb-4">
-                  {serviceError || "The requested service could not be found."}
-                </p>
-                <div className="flex gap-2">
-                  <Button variant="outline" onClick={() => router.back()}>
-                    <ArrowLeft className="mr-2 h-4 w-4" />
-                    Go Back
-                  </Button>
-                  <Button asChild>
-                    <Link href="/services">
-                      View All Services
-                    </Link>
-                  </Button>
+      <TemplatePage
+        title="INFRASTRUCTURE"
+        sections={[
+          { id: "overview", icon: Monitor, label: "COMMAND", href: "/" },
+          { id: "groups", icon: Users, label: "GROUPS", href: "/groups" },
+          { id: "services", icon: Target, label: "SERVICES", href: "/services" },
+        ]}
+        currentSection="services"
+        showSystemStatus={true}
+        breadcrumb="VIEW"
+      >
+        <div className="p-6">
+          {/* Error Header */}
+          <div className="border-b border-neutral-700 bg-neutral-800/50 backdrop-blur-sm rounded-lg mb-6">
+            <div className="px-6 py-4">
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-lg bg-gradient-to-r from-red-500 to-red-600 shadow-lg">
+                  <Server className="h-6 w-6 text-white" />
+                </div>
+                <div>
+                  <h1 className="text-2xl font-bold bg-gradient-to-r from-red-400 to-red-500 bg-clip-text text-transparent">
+                    Service Not Found
+                  </h1>
+                  <p className="text-sm text-neutral-400">Unable to load the requested service</p>
                 </div>
               </div>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
+
+          {/* Error Content */}
+          <div className="max-w-4xl">
+            <Card className="bg-neutral-900 border-neutral-700">
+              <CardContent className="flex flex-col items-center justify-center py-12">
+                <div className="text-center">
+                  <h3 className="text-lg font-semibold mb-2 text-white">Service Not Found</h3>
+                  <p className="text-neutral-400 mb-4">
+                    {serviceError || "The requested service could not be found."}
+                  </p>
+                  <div className="flex gap-2">
+                    <Button 
+                      variant="outline" 
+                      onClick={() => router.back()}
+                      className="bg-neutral-800 border-neutral-700 text-neutral-300 hover:bg-neutral-700 hover:text-white"
+                    >
+                      <ArrowLeft className="mr-2 h-4 w-4" />
+                      Go Back
+                    </Button>
+                    <Button 
+                      asChild
+                      className="bg-orange-500 hover:bg-orange-600 text-white border-orange-500"
+                    >
+                      <Link href="/services">
+                        View All Services
+                      </Link>
+                    </Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
         </div>
-      </>
+      </TemplatePage>
     )
   }
 
   const ServiceTypeIcon = serviceTypeIcons[service.type]
 
   return (
-    <>
-      <PageHeader 
-        title={service.name}
-        description="Service details and configuration"
-        action={
-          <div className="flex gap-2">
-            <Button variant="outline" asChild>
-              <Link href="/services">
-                <ArrowLeft className="mr-2 h-4 w-4" />
-                Back to Services
-              </Link>
-            </Button>
-            <Button variant="outline" asChild>
-              <Link href={`/services/${service.id}/edit`}>
-                <Edit className="mr-2 h-4 w-4" />
-                Edit
-              </Link>
-            </Button>
-            <Button 
-              variant="destructive" 
-              onClick={() => setDeleteDialogOpen(true)}
-              disabled={deleteService.loading}
-            >
-              <Trash2 className="mr-2 h-4 w-4" />
-              Delete
-            </Button>
+    <TemplatePage
+      title="INFRASTRUCTURE"
+      sections={[
+        { id: "overview", icon: Monitor, label: "COMMAND", href: "/" },
+        { id: "groups", icon: Users, label: "GROUPS", href: "/groups" },
+        { id: "services", icon: Target, label: "SERVICES", href: "/services" },
+      ]}
+      currentSection="services"
+      showSystemStatus={true}
+      breadcrumb="VIEW"
+    >
+      <div className="p-6">
+        {/* Service Detail Header */}
+        <div className="border-b border-neutral-700 bg-neutral-800/50 backdrop-blur-sm rounded-lg mb-6">
+          <div className="px-6 py-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-lg bg-gradient-to-r from-orange-500 to-red-500 shadow-lg">
+                  <ServiceTypeIcon className="h-6 w-6 text-white" />
+                </div>
+                <div>
+                  <h1 className="text-2xl font-bold bg-gradient-to-r from-orange-400 to-red-400 bg-clip-text text-transparent">
+                    {service.name}
+                  </h1>
+                  <p className="text-sm text-neutral-400">
+                    {formatServiceType(service.type)} Service • {serviceGroup?.name || 'Unknown Group'}
+                  </p>
+                </div>
+              </div>
+              <div className="flex gap-3">
+                <Button 
+                  asChild
+                  variant="outline"
+                  className="bg-neutral-800 border-orange-500 text-orange-500 hover:bg-orange-500 hover:text-white transition-all duration-300 font-medium tracking-wider"
+                >
+                  <Link href={`/services/${service.id}/edit`}>
+                    <Edit className="mr-2 h-4 w-4" />
+                    EDIT
+                  </Link>
+                </Button>
+                <Button 
+                  variant="outline"
+                  onClick={() => setDeleteDialogOpen(true)}
+                  className="bg-neutral-800 border-red-500 text-red-500 hover:bg-red-500 hover:text-white transition-all duration-300 font-medium tracking-wider"
+                >
+                  <Trash2 className="mr-2 h-4 w-4" />
+                  DELETE
+                </Button>
+              </div>
+            </div>
           </div>
-        }
-      />
-      
-      <div className="flex flex-1 flex-col gap-6 p-4 pt-0">
+        </div>
+
         {/* Service Overview */}
         <div className="grid gap-6 md:grid-cols-2">
           {/* Basic Information */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <ServiceTypeIcon className="h-5 w-5" />
-                Basic Information
+          <Card className="bg-neutral-900 border-neutral-700">
+            <CardHeader className="border-b border-neutral-700">
+              <CardTitle className="flex items-center gap-2 text-white">
+                <ServiceTypeIcon className="h-5 w-5 text-orange-500" />
+                BASIC INFORMATION
               </CardTitle>
-              <CardDescription>
+              <CardDescription className="text-neutral-400">
                 Core service details and identification
               </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="space-y-4 p-6">
               <div>
-                <label className="text-sm font-medium text-muted-foreground">Service Name</label>
-                <p className="text-lg font-semibold">{service.name}</p>
+                <label className="text-sm font-medium text-neutral-300 tracking-wider">SERVICE NAME</label>
+                <p className="text-lg font-semibold text-white font-mono">{service.name}</p>
               </div>
               
               <div>
-                <label className="text-sm font-medium text-muted-foreground">Service Type</label>
+                <label className="text-sm font-medium text-neutral-300 tracking-wider">SERVICE TYPE</label>
                 <div className="mt-1">
-                  <Badge variant="secondary" className="text-sm">
-                    {formatServiceType(service.type)}
+                  <Badge className="bg-orange-500/20 text-orange-500 border-orange-500/30">
+                    {formatServiceType(service.type).toUpperCase()}
                   </Badge>
                 </div>
               </div>
               
               <div>
-                <label className="text-sm font-medium text-muted-foreground">Group</label>
+                <label className="text-sm font-medium text-neutral-300 tracking-wider">GROUP</label>
                 <p className="text-sm">
                   {serviceGroup ? (
                     <Link 
                       href={`/groups/${serviceGroup.id}`}
-                      className="text-primary hover:underline"
+                      className="text-orange-400 hover:text-orange-300 hover:underline"
                     >
                       {serviceGroup.name}
                     </Link>
                   ) : (
-                    <span className="text-muted-foreground">Unknown Group</span>
+                    <span className="text-neutral-400">Unknown Group</span>
                   )}
                 </p>
                 {serviceGroup?.description && (
-                  <p className="text-xs text-muted-foreground mt-1">
+                  <p className="text-xs text-neutral-400 mt-1">
                     {serviceGroup.description}
                   </p>
                 )}
@@ -218,56 +302,60 @@ export default function ServiceDetailPage() {
 
               {service.domain && (
                 <div>
-                  <label className="text-sm font-medium text-muted-foreground">Domain</label>
-                  <p className="font-mono text-sm">{service.domain}</p>
+                  <label className="text-sm font-medium text-neutral-300 tracking-wider">DOMAIN</label>
+                  <p className="font-mono text-sm text-white bg-neutral-800 px-2 py-1 rounded">{service.domain}</p>
                 </div>
               )}
             </CardContent>
           </Card>
 
           {/* Network Configuration */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Network className="h-5 w-5" />
-                Network Configuration
+          <Card className="bg-neutral-900 border-neutral-700">
+            <CardHeader className="border-b border-neutral-700">
+              <CardTitle className="flex items-center gap-2 text-white">
+                <Network className="h-5 w-5 text-orange-500" />
+                NETWORK CONFIGURATION
               </CardTitle>
-              <CardDescription>
+              <CardDescription className="text-neutral-400">
                 Network settings and connectivity details
               </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="space-y-4 p-6">
               <div>
-                <label className="text-sm font-medium text-muted-foreground">
-                  IP Addresses ({service.ip_addresses.length})
+                <label className="text-sm font-medium text-neutral-300 tracking-wider">
+                  IP ADDRESSES ({service.ipAddress ? service.ipAddress.split(',').length : 0})
                 </label>
                 <div className="mt-1 space-y-1">
-                  {service.ip_addresses.map((ip, index) => (
-                    <p key={index} className="font-mono text-sm bg-muted px-2 py-1 rounded">
-                      {ip}
+                  {service.ipAddress ? service.ipAddress.split(',').map((ip, index) => (
+                    <p key={index} className="font-mono text-sm bg-neutral-800 px-2 py-1 rounded text-white">
+                      {ip.trim()}
                     </p>
-                  ))}
+                  )) : (
+                    <p className="text-sm text-neutral-400">No IP addresses configured</p>
+                  )}
                 </div>
               </div>
 
               <div>
-                <label className="text-sm font-medium text-muted-foreground">
-                  Ports ({service.ports.length})
+                <label className="text-sm font-medium text-neutral-300 tracking-wider">
+                  INTERNAL PORTS ({service.internalPorts?.length || 0})
                 </label>
                 <div className="mt-1 flex flex-wrap gap-1">
-                  {service.ports.map((port, index) => (
-                    <Badge key={index} variant="outline" className="font-mono">
+                  {service.internalPorts?.map((port, index) => (
+                    <Badge key={index} className="bg-neutral-800 border-neutral-700 text-white font-mono">
                       {port}
                     </Badge>
-                  ))}
+                  )) || (
+                    <p className="text-sm text-neutral-400">No ports configured</p>
+                  )}
                 </div>
               </div>
 
-              {service.vlan_id && (
+              {service.vlan && (
                 <div>
-                  <label className="text-sm font-medium text-muted-foreground">VLAN ID</label>
-                  <p className="font-mono text-sm bg-muted px-2 py-1 rounded inline-block">
-                    {service.vlan_id}
+                  <label className="text-sm font-medium text-neutral-300 tracking-wider">VLAN ID</label>
+                  <p className="font-mono text-sm bg-neutral-800 px-2 py-1 rounded inline-block text-white">
+                    {service.vlan}
                   </p>
                 </div>
               )}
@@ -276,22 +364,22 @@ export default function ServiceDetailPage() {
         </div>
 
         {/* Metadata */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Metadata</CardTitle>
-            <CardDescription>
+        <Card className="bg-neutral-900 border-neutral-700 mt-6">
+          <CardHeader className="border-b border-neutral-700">
+            <CardTitle className="text-white">METADATA</CardTitle>
+            <CardDescription className="text-neutral-400">
               Service creation and modification timestamps
             </CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="p-6">
             <div className="grid gap-4 md:grid-cols-2">
               <div>
-                <label className="text-sm font-medium text-muted-foreground">Created</label>
-                <p className="text-sm">{formatDate(service.created_at)}</p>
+                <label className="text-sm font-medium text-neutral-300 tracking-wider">CREATED</label>
+                <p className="text-sm text-white font-mono">{formatDate(service.createdAt)}</p>
               </div>
               <div>
-                <label className="text-sm font-medium text-muted-foreground">Last Updated</label>
-                <p className="text-sm">{formatDate(service.updated_at)}</p>
+                <label className="text-sm font-medium text-neutral-300 tracking-wider">LAST UPDATED</label>
+                <p className="text-sm text-white font-mono">{formatDate(service.updatedAt)}</p>
               </div>
             </div>
           </CardContent>
@@ -316,6 +404,6 @@ export default function ServiceDetailPage() {
         loading={deleteService.loading}
         variant="destructive"
       />
-    </>
+    </TemplatePage>
   )
 }

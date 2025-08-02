@@ -12,29 +12,4 @@ export { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTr
 export { Skeleton } from './skeleton'
 export { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, TableCaption } from './table'
 export { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './tooltip'
-export {
-  Sidebar,
-  SidebarContent,
-  SidebarFooter,
-  SidebarGroup,
-  SidebarGroupAction,
-  SidebarGroupContent,
-  SidebarGroupLabel,
-  SidebarHeader,
-  SidebarInput,
-  SidebarInset,
-  SidebarMenu,
-  SidebarMenuAction,
-  SidebarMenuBadge,
-  SidebarMenuButton,
-  SidebarMenuItem,
-  SidebarMenuSkeleton,
-  SidebarMenuSub,
-  SidebarMenuSubButton,
-  SidebarMenuSubItem,
-  SidebarProvider,
-  SidebarRail,
-  SidebarSeparator,
-  SidebarTrigger,
-  useSidebar,
-} from './sidebar-old'
+// Sidebar components removed - using custom template system instead

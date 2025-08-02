@@ -67,11 +67,11 @@ export function ConfirmationDialog({
   const getIcon = () => {
     switch (variant) {
       case "destructive":
-        return <AlertTriangle className="h-5 w-5 text-destructive" />
+        return <AlertTriangle className="h-5 w-5 text-red-500" />
       case "warning":
-        return <AlertCircle className="h-5 w-5 text-yellow-600" />
+        return <AlertCircle className="h-5 w-5 text-orange-500" />
       case "info":
-        return <Info className="h-5 w-5 text-blue-600" />
+        return <Info className="h-5 w-5 text-orange-500" />
       default:
         return null
     }
@@ -155,27 +155,27 @@ export function ConfirmationDialog({
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent 
         ref={dialogRef}
-        className="sm:max-w-[500px] focus-trap"
+        className="sm:max-w-[500px] focus-trap bg-neutral-900 border-neutral-700 text-white"
         onKeyDown={handleKeyDown}
         role={variant === "destructive" ? "alertdialog" : "dialog"}
         aria-labelledby={titleId}
         aria-describedby={descriptionId}
       >
         <DialogHeader>
-          <DialogTitle id={titleId} className="flex items-center gap-2">
+          <DialogTitle id={titleId} className="flex items-center gap-2 text-white font-medium tracking-wider">
             {getIcon()}
-            {title}
+            {title.toUpperCase()}
           </DialogTitle>
-          <DialogDescription id={descriptionId} className="text-left">
+          <DialogDescription id={descriptionId} className="text-left text-neutral-300">
             {description}
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4">
           {showWarning && warningMessage && (
-            <Alert variant="destructive" role="alert" aria-live="polite">
-              <AlertTriangle className="h-4 w-4" aria-hidden="true" />
-              <AlertDescription>{warningMessage}</AlertDescription>
+            <Alert variant="destructive" role="alert" aria-live="polite" className="bg-red-500/10 border-red-500/30 text-red-400">
+              <AlertTriangle className="h-4 w-4 text-red-500" aria-hidden="true" />
+              <AlertDescription className="text-red-400">{warningMessage}</AlertDescription>
             </Alert>
           )}
 
@@ -183,9 +183,9 @@ export function ConfirmationDialog({
             <div className="space-y-2">
               <label 
                 htmlFor={`${dialogId}-confirmation-input`}
-                className="text-sm font-medium"
+                className="text-sm font-medium text-neutral-300 tracking-wider"
               >
-                Type <code className="bg-muted px-1 py-0.5 rounded text-sm">{confirmationText}</code> to confirm:
+                Type <code className="bg-neutral-800 border border-neutral-700 px-2 py-1 rounded text-sm text-orange-500 font-mono">{confirmationText}</code> to confirm:
               </label>
               <input
                 ref={inputRef}
@@ -193,7 +193,7 @@ export function ConfirmationDialog({
                 type="text"
                 value={confirmationInput}
                 onChange={(e) => setConfirmationInput(e.target.value)}
-                className="w-full px-3 py-2 border border-input rounded-md keyboard-focus touch-target"
+                className="w-full px-3 py-2 bg-neutral-800 border border-neutral-700 text-white placeholder:text-neutral-500 focus:border-orange-500 focus:ring-orange-500 rounded-md keyboard-focus touch-target font-mono"
                 placeholder={confirmationText}
                 disabled={loading}
                 aria-required="true"
@@ -209,34 +209,39 @@ export function ConfirmationDialog({
               variant="destructive" 
               role="alert" 
               aria-live="assertive"
+              className="bg-red-500/10 border-red-500/30 text-red-400"
             >
-              <AlertCircle className="h-4 w-4" aria-hidden="true" />
-              <AlertDescription>{error}</AlertDescription>
+              <AlertCircle className="h-4 w-4 text-red-500" aria-hidden="true" />
+              <AlertDescription className="text-red-400">{error}</AlertDescription>
             </Alert>
           )}
         </div>
 
-        <DialogFooter>
+        <DialogFooter className="gap-3">
           <Button
             ref={cancelButtonRef}
             variant="outline"
             onClick={() => handleOpenChange(false)}
             disabled={loading}
-            className="keyboard-focus touch-target"
+            className="bg-neutral-800 border-neutral-700 text-neutral-300 hover:bg-neutral-700 hover:text-white transition-all duration-300 font-medium tracking-wider keyboard-focus touch-target"
             aria-label={`${cancelText} and close dialog`}
           >
-            {cancelText}
+            {cancelText.toUpperCase()}
           </Button>
           <Button
             ref={confirmButtonRef}
             variant={variant === "destructive" ? "destructive" : "default"}
             onClick={handleConfirm}
             disabled={loading || disabled || !isConfirmationValid}
-            className="keyboard-focus touch-target"
+            className={`${
+              variant === "destructive" 
+                ? "bg-red-500 hover:bg-red-600 text-white border-red-500" 
+                : "bg-orange-500 hover:bg-orange-600 text-white border-orange-500"
+            } transition-all duration-300 font-medium tracking-wider keyboard-focus touch-target`}
             aria-label={`${confirmText}${requireConfirmation ? ' (requires confirmation text)' : ''}`}
           >
             {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />}
-            {confirmText}
+            {confirmText.toUpperCase()}
           </Button>
         </DialogFooter>
       </DialogContent>
@@ -363,17 +368,17 @@ export function UnsavedChangesDialog({
 }: UnsavedChangesDialogProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-[425px] bg-neutral-900 border-neutral-700 text-white">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <AlertTriangle className="h-5 w-5 text-yellow-600" />
-            Unsaved Changes
+          <DialogTitle className="flex items-center gap-2 text-white font-medium tracking-wider">
+            <AlertTriangle className="h-5 w-5 text-orange-500" />
+            UNSAVED CHANGES
           </DialogTitle>
-          <DialogDescription>
+          <DialogDescription className="text-neutral-300">
             You have unsaved changes. What would you like to do?
           </DialogDescription>
         </DialogHeader>
-        <DialogFooter className="flex-col sm:flex-row gap-2">
+        <DialogFooter className="flex-col sm:flex-row gap-3">
           <Button
             variant="outline"
             onClick={() => {
@@ -381,17 +386,17 @@ export function UnsavedChangesDialog({
               onOpenChange(false)
             }}
             disabled={loading}
-            className="w-full sm:w-auto"
+            className="w-full sm:w-auto bg-neutral-800 border-red-500 text-red-500 hover:bg-red-500 hover:text-white transition-all duration-300 font-medium tracking-wider"
           >
-            Discard Changes
+            DISCARD CHANGES
           </Button>
           <Button
             variant="outline"
             onClick={() => onOpenChange(false)}
             disabled={loading}
-            className="w-full sm:w-auto"
+            className="w-full sm:w-auto bg-neutral-800 border-neutral-700 text-neutral-300 hover:bg-neutral-700 hover:text-white transition-all duration-300 font-medium tracking-wider"
           >
-            Continue Editing
+            CONTINUE EDITING
           </Button>
           <Button
             onClick={async () => {
@@ -399,10 +404,10 @@ export function UnsavedChangesDialog({
               onOpenChange(false)
             }}
             disabled={loading}
-            className="w-full sm:w-auto"
+            className="w-full sm:w-auto bg-orange-500 hover:bg-orange-600 text-white border-orange-500 transition-all duration-300 font-medium tracking-wider"
           >
             {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            Save Changes
+            SAVE CHANGES
           </Button>
         </DialogFooter>
       </DialogContent>

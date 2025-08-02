@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { Filter, X, ChevronDown, RotateCcw } from "lucide-react"
 
-import { Button } from "@/components/ui/button"
+import { TacticalButton } from "@/components/tactical/tactical-button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Badge } from "@/components/ui/badge"
@@ -112,10 +112,12 @@ export function AdvancedFilters({ onFiltersChange, className }: AdvancedFiltersP
   }, [searchParams])
 
   const updateFilter = (key: keyof FilterState, value: string) => {
-    setFilters(prev => ({ ...prev, [key]: value }))
+    // Convert "all" back to empty string for filtering logic
+    const filterValue = value === "all" ? "" : value
+    setFilters(prev => ({ ...prev, [key]: filterValue }))
     
     // Announce filter changes to screen readers
-    if (value) {
+    if (filterValue) {
       announcer.announce(SCREEN_READER_MESSAGES.FILTER_APPLIED)
     } else {
       announcer.announce(SCREEN_READER_MESSAGES.FILTER_CLEARED)
@@ -203,9 +205,9 @@ export function AdvancedFilters({ onFiltersChange, className }: AdvancedFiltersP
         {/* Advanced Filters Popover */}
         <Popover open={isOpen} onOpenChange={handleOpenChange}>
           <PopoverTrigger asChild>
-            <Button 
+            <TacticalButton 
               ref={triggerRef}
-              variant="outline" 
+              variant="secondary" 
               size="sm" 
               className="relative keyboard-focus touch-target"
               aria-expanded={isOpen}
@@ -214,11 +216,10 @@ export function AdvancedFilters({ onFiltersChange, className }: AdvancedFiltersP
               aria-describedby={filtersDescriptionId}
             >
               <Filter className="mr-2 h-4 w-4" aria-hidden="true" />
-              Filters
+              FILTERS
               {activeFilterCount > 0 && (
                 <Badge 
-                  variant="secondary" 
-                  className="ml-2 h-5 w-5 rounded-full p-0 text-xs"
+                  className="ml-2 h-5 w-5 rounded-full p-0 text-xs bg-orange-500/20 text-orange-500 border-orange-500/30"
                   aria-label={`${activeFilterCount} active filters`}
                 >
                   {activeFilterCount}
@@ -229,12 +230,12 @@ export function AdvancedFilters({ onFiltersChange, className }: AdvancedFiltersP
                 aria-hidden="true"
                 style={{ transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)' }}
               />
-            </Button>
+            </TacticalButton>
           </PopoverTrigger>
           <PopoverContent 
             ref={popoverRef}
             id={filterId}
-            className="w-80" 
+            className="w-80 bg-neutral-900 border-neutral-700" 
             align="start"
             role="dialog"
             aria-labelledby={`${filterId}-title`}
@@ -243,9 +244,9 @@ export function AdvancedFilters({ onFiltersChange, className }: AdvancedFiltersP
           >
             <div className="space-y-4">
               <div className="flex items-center justify-between">
-                <h4 id={`${filterId}-title`} className="font-medium">Advanced Filters</h4>
+                <h4 id={`${filterId}-title`} className="font-medium text-white tracking-wider">ADVANCED FILTERS</h4>
                 {activeFilterCount > 0 && (
-                  <Button
+                  <TacticalButton
                     variant="ghost"
                     size="sm"
                     onClick={clearAllFilters}
@@ -253,8 +254,8 @@ export function AdvancedFilters({ onFiltersChange, className }: AdvancedFiltersP
                     aria-label="Clear all filters"
                   >
                     <RotateCcw className="mr-1 h-3 w-3" aria-hidden="true" />
-                    Clear all
-                  </Button>
+                    CLEAR ALL
+                  </TacticalButton>
                 )}
               </div>
               
@@ -266,41 +267,41 @@ export function AdvancedFilters({ onFiltersChange, className }: AdvancedFiltersP
               
               {/* Service Type Filter */}
               <div className="space-y-2">
-                <Label htmlFor="type-filter">Service Type</Label>
+                <Label htmlFor="type-filter" className="text-neutral-300 tracking-wider text-xs">SERVICE TYPE</Label>
                 <Select
                   value={filters.type}
                   onValueChange={(value) => updateFilter('type', value)}
                 >
-                  <SelectTrigger id="type-filter">
-                    <SelectValue placeholder="All types" />
+                  <SelectTrigger id="type-filter" className="bg-neutral-800 border-neutral-700 text-white focus:border-orange-500">
+                    <SelectValue placeholder="ALL TYPES" />
                   </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="">All types</SelectItem>
-                    <SelectItem value="web">Web</SelectItem>
-                    <SelectItem value="database">Database</SelectItem>
-                    <SelectItem value="api">API</SelectItem>
-                    <SelectItem value="storage">Storage</SelectItem>
-                    <SelectItem value="security">Security</SelectItem>
-                    <SelectItem value="monitoring">Monitoring</SelectItem>
+                  <SelectContent className="bg-neutral-800 border-neutral-700">
+                    <SelectItem value="all" className="text-white hover:bg-neutral-700">ALL TYPES</SelectItem>
+                    <SelectItem value="web" className="text-white hover:bg-neutral-700">WEB</SelectItem>
+                    <SelectItem value="database" className="text-white hover:bg-neutral-700">DATABASE</SelectItem>
+                    <SelectItem value="api" className="text-white hover:bg-neutral-700">API</SelectItem>
+                    <SelectItem value="storage" className="text-white hover:bg-neutral-700">STORAGE</SelectItem>
+                    <SelectItem value="security" className="text-white hover:bg-neutral-700">SECURITY</SelectItem>
+                    <SelectItem value="monitoring" className="text-white hover:bg-neutral-700">MONITORING</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
 
               {/* Group Filter */}
               <div className="space-y-2">
-                <Label htmlFor="group-filter">Group</Label>
+                <Label htmlFor="group-filter" className="text-neutral-300 tracking-wider text-xs">GROUP</Label>
                 <Select
                   value={filters.groupId}
                   onValueChange={(value) => updateFilter('groupId', value)}
                 >
-                  <SelectTrigger id="group-filter">
-                    <SelectValue placeholder="All groups" />
+                  <SelectTrigger id="group-filter" className="bg-neutral-800 border-neutral-700 text-white focus:border-orange-500">
+                    <SelectValue placeholder="ALL GROUPS" />
                   </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="">All groups</SelectItem>
+                  <SelectContent className="bg-neutral-800 border-neutral-700">
+                    <SelectItem value="all" className="text-white hover:bg-neutral-700">ALL GROUPS</SelectItem>
                     {groups.map(group => (
-                      <SelectItem key={group.id} value={group.id}>
-                        {group.name}
+                      <SelectItem key={group.id} value={group.id} className="text-white hover:bg-neutral-700">
+                        {group.name.toUpperCase()}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -309,51 +310,55 @@ export function AdvancedFilters({ onFiltersChange, className }: AdvancedFiltersP
 
               {/* VLAN ID Filter */}
               <div className="space-y-2">
-                <Label htmlFor="vlan-filter">VLAN ID</Label>
+                <Label htmlFor="vlan-filter" className="text-neutral-300 tracking-wider text-xs">VLAN ID</Label>
                 <Input
                   id="vlan-filter"
                   type="number"
-                  placeholder="e.g., 100"
+                  placeholder="100"
                   value={filters.vlanId}
                   onChange={(e) => updateFilter('vlanId', e.target.value)}
                   min="1"
                   max="4094"
+                  className="bg-neutral-800 border-neutral-700 text-white placeholder:text-neutral-500 focus:border-orange-500 font-mono"
                 />
               </div>
 
               {/* IP Address Filter */}
               <div className="space-y-2">
-                <Label htmlFor="ip-filter">IP Address</Label>
+                <Label htmlFor="ip-filter" className="text-neutral-300 tracking-wider text-xs">IP ADDRESS</Label>
                 <Input
                   id="ip-filter"
-                  placeholder="e.g., 192.168.1.100"
+                  placeholder="192.168.1.100"
                   value={filters.ipAddress}
                   onChange={(e) => updateFilter('ipAddress', e.target.value)}
+                  className="bg-neutral-800 border-neutral-700 text-white placeholder:text-neutral-500 focus:border-orange-500 font-mono"
                 />
               </div>
 
               {/* Domain Filter */}
               <div className="space-y-2">
-                <Label htmlFor="domain-filter">Domain</Label>
+                <Label htmlFor="domain-filter" className="text-neutral-300 tracking-wider text-xs">DOMAIN</Label>
                 <Input
                   id="domain-filter"
-                  placeholder="e.g., example.com"
+                  placeholder="example.com"
                   value={filters.domain}
                   onChange={(e) => updateFilter('domain', e.target.value)}
+                  className="bg-neutral-800 border-neutral-700 text-white placeholder:text-neutral-500 focus:border-orange-500 font-mono"
                 />
               </div>
 
               {/* Port Range Filter */}
               <div className="space-y-2">
-                <Label htmlFor="port-filter">Port Range</Label>
+                <Label htmlFor="port-filter" className="text-neutral-300 tracking-wider text-xs">PORT RANGE</Label>
                 <Input
                   id="port-filter"
-                  placeholder="e.g., 80, 443, 8000-8080"
+                  placeholder="80, 443, 8000-8080"
                   value={filters.portRange}
                   onChange={(e) => updateFilter('portRange', e.target.value)}
+                  className="bg-neutral-800 border-neutral-700 text-white placeholder:text-neutral-500 focus:border-orange-500 font-mono"
                 />
-                <p className="text-xs text-muted-foreground">
-                  Enter specific ports (80, 443) or ranges (8000-8080)
+                <p className="text-xs text-neutral-500">
+                  ENTER SPECIFIC PORTS (80, 443) OR RANGES (8000-8080)
                 </p>
               </div>
             </div>
@@ -362,15 +367,15 @@ export function AdvancedFilters({ onFiltersChange, className }: AdvancedFiltersP
 
         {/* Clear All Filters Button */}
         {activeFilterCount > 0 && (
-          <Button
+          <TacticalButton
             variant="ghost"
             size="sm"
             onClick={clearAllFilters}
-            className="text-muted-foreground hover:text-foreground"
+            className="text-neutral-400 hover:text-orange-500"
           >
             <X className="mr-1 h-4 w-4" />
-            Clear all
-          </Button>
+            CLEAR ALL
+          </TacticalButton>
         )}
       </div>
 
@@ -380,21 +385,20 @@ export function AdvancedFilters({ onFiltersChange, className }: AdvancedFiltersP
           {activeFilterBadges.map(({ key, label, value }) => (
             <Badge
               key={key}
-              variant="secondary"
-              className="flex items-center gap-1 pr-1"
+              className="flex items-center gap-1 pr-1 bg-orange-500/20 text-orange-500 border-orange-500/30"
             >
-              <span className="text-xs">
-                {label}: {value}
+              <span className="text-xs font-mono">
+                {label.toUpperCase()}: {value.toUpperCase()}
               </span>
-              <Button
+              <TacticalButton
                 variant="ghost"
                 size="sm"
                 onClick={() => clearFilter(key)}
-                className="h-4 w-4 p-0 hover:bg-muted-foreground/20"
+                className="h-4 w-4 p-0 hover:bg-orange-500/20 text-orange-500 hover:text-white"
               >
                 <X className="h-3 w-3" />
                 <span className="sr-only">Remove {label} filter</span>
-              </Button>
+              </TacticalButton>
             </Badge>
           ))}
         </div>

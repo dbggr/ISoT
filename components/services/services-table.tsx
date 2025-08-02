@@ -38,25 +38,20 @@ import {
   ScreenReaderAnnouncer,
   generateId 
 } from "@/lib/accessibility"
-import { 
-  Table, 
-  TableBody, 
-  TableCell, 
-  TableHead, 
-  TableHeader, 
-  TableRow 
-} from "@/components/ui/table"
-import { Button } from "@/components/ui/button"
+import { TacticalTable, TacticalTableColumn } from "@/components/tactical/tactical-table"
+import { TacticalButton } from "@/components/tactical/tactical-button"
+import { StatusIndicator } from "@/components/tactical/status-indicator"
+import { TacticalModal, TacticalConfirmationModal } from "@/components/tactical/tactical-modal"
+import { ServiceDetailModal } from "@/components/services/service-detail-modal"
 import { Input } from "@/components/ui/input"
 import { Checkbox } from "@/components/ui/checkbox"
+import { Badge } from "@/components/ui/badge"
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Skeleton } from "@/components/ui/skeleton"
 import { useToast } from "@/hooks/use-toast"
 
 // Types for sorting and filtering
@@ -108,6 +103,10 @@ export function ServicesTable({
   const [bulkGroupChangeDialogOpen, setBulkGroupChangeDialogOpen] = useState(false)
   const [serviceToDelete, setServiceToDelete] = useState<NetworkService | null>(null)
   const [targetGroupId, setTargetGroupId] = useState<string>('')
+
+  // State for service detail modal
+  const [detailModalOpen, setDetailModalOpen] = useState(false)
+  const [selectedServiceForDetail, setSelectedServiceForDetail] = useState<NetworkService | null>(null)
 
   // Fetch all data (filtering will be done client-side for better search experience)
   const { data: allServices, loading: servicesLoading, error: servicesError, refetch } = useServices()
@@ -206,6 +205,12 @@ export function ServicesTable({
       newSelected.delete(serviceId)
     }
     setSelectedServices(newSelected)
+  }
+
+  // Handle service detail modal
+  const handleServiceDetail = (service: NetworkService) => {
+    setSelectedServiceForDetail(service)
+    setDetailModalOpen(true)
   }
 
   // Handle individual service delete
@@ -419,76 +424,232 @@ export function ServicesTable({
       <ChevronDown className="ml-1 h-4 w-4" />
   }
 
+  // Get service status based on type and data
+  const getServiceStatus = (service: NetworkService) => {
+    // Simple status logic - can be enhanced based on actual service monitoring
+    if (service.ipAddress && service.internalPorts?.length > 0) {
+      return 'online'
+    }
+    if (!service.ipAddress) {
+      return 'warning'
+    }
+    return 'offline'
+  }
+
+  // Define tactical table columns
+  const tacticalColumns: TacticalTableColumn<NetworkService>[] = [
+    {
+      key: 'select',
+      header: '',
+      headerClassName: 'w-12',
+      render: (_, service) => (
+        <Checkbox
+          checked={selectedServices.has(service.id)}
+          onCheckedChange={(checked) => 
+            handleSelectService(service.id, checked as boolean)
+          }
+          aria-label={`Select ${service.name}`}
+          className="h-4 w-4 min-h-4 min-w-4"
+        />
+      )
+    },
+    {
+      key: 'name',
+      header: 'Service Name',
+      headerClassName: 'min-w-[150px]',
+      render: (name, service) => (
+        <Link 
+          href={`/services/${service.id}`}
+          className="hover:text-orange-500 transition-colors font-mono"
+          onClick={() => onServiceSelect?.(service)}
+        >
+          <HighlightedText 
+            text={name} 
+            searchTerm={filters.search} 
+          />
+        </Link>
+      )
+    },
+    {
+      key: 'type',
+      header: 'Type',
+      headerClassName: 'min-w-[100px]',
+      render: (type) => (
+        <Badge className="bg-orange-500/20 text-orange-500 border-orange-500/30 font-mono text-xs">
+          {formatServiceType(type)}
+        </Badge>
+      )
+    },
+    {
+      key: 'status',
+      header: 'Status',
+      headerClassName: 'min-w-[80px]',
+      render: (_, service) => (
+        <StatusIndicator 
+          status={getServiceStatus(service)} 
+          label={getServiceStatus(service)}
+          showPulse={getServiceStatus(service) === 'online'}
+        />
+      )
+    },
+    {
+      key: 'ipAddress',
+      header: 'IP Addresses',
+      headerClassName: 'min-w-[140px] hidden sm:table-cell',
+      className: 'hidden sm:table-cell',
+      render: (ipAddress) => (
+        <div className="font-mono text-sm max-w-[120px] truncate" title={ipAddress || ''}>
+          {ipAddress ? formatIpAddresses(ipAddress.split(',')) : <span className="text-neutral-500">NONE</span>}
+        </div>
+      )
+    },
+    {
+      key: 'internalPorts',
+      header: 'Ports',
+      headerClassName: 'min-w-[100px] hidden sm:table-cell',
+      className: 'hidden sm:table-cell',
+      render: (ports) => (
+        <div className="font-mono text-sm max-w-[80px] truncate" title={ports?.join(', ') || ''}>
+          {ports?.length > 0 ? ports.join('; ') : <span className="text-neutral-500">NONE</span>}
+        </div>
+      )
+    },
+    {
+      key: 'vlan',
+      header: 'VLAN',
+      headerClassName: 'min-w-[80px] hidden md:table-cell',
+      className: 'hidden md:table-cell',
+      render: (vlan) => (
+        vlan ? (
+          <span className="font-mono text-sm">{vlan}</span>
+        ) : (
+          <span className="text-neutral-500">-</span>
+        )
+      )
+    },
+    {
+      key: 'domain',
+      header: 'Domain',
+      headerClassName: 'min-w-[120px] hidden md:table-cell',
+      className: 'hidden md:table-cell',
+      render: (domain) => (
+        domain ? (
+          <div className="font-mono text-sm max-w-[100px] truncate" title={domain}>
+            {domain}
+          </div>
+        ) : (
+          <span className="text-neutral-500">-</span>
+        )
+      )
+    },
+    {
+      key: 'groupId',
+      header: 'Group',
+      headerClassName: 'min-w-[120px]',
+      render: (groupId) => (
+        <div className="max-w-[100px] truncate text-orange-500" title={groupsMap[groupId]?.name || 'Unknown'}>
+          {groupsMap[groupId]?.name || 'UNKNOWN'}
+        </div>
+      )
+    },
+    {
+      key: 'createdAt',
+      header: 'Created',
+      headerClassName: 'min-w-[100px] hidden lg:table-cell',
+      className: 'hidden lg:table-cell',
+      render: (createdAt) => (
+        <span className="text-neutral-400 font-mono text-xs">
+          {new Date(createdAt).toLocaleDateString()}
+        </span>
+      )
+    },
+    {
+      key: 'actions',
+      header: 'Actions',
+      headerClassName: 'w-12',
+      render: (_, service) => (
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <TacticalButton variant="ghost" size="icon">
+              <MoreHorizontal className="h-4 w-4" />
+              <span className="sr-only">Open menu</span>
+            </TacticalButton>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-40 bg-neutral-900 border-neutral-700">
+            <DropdownMenuItem 
+              onClick={() => handleServiceDetail(service)}
+              className="touch-target text-white hover:bg-neutral-700 hover:text-orange-400 focus:bg-neutral-700 focus:text-orange-400"
+            >
+              <Eye className="mr-2 h-4 w-4" />
+              VIEW DETAILS
+            </DropdownMenuItem>
+            <DropdownMenuItem asChild>
+              <Link href={`/services/${service.id}/edit`} className="touch-target text-white hover:bg-neutral-700 hover:text-orange-400 focus:bg-neutral-700 focus:text-orange-400">
+                <Edit className="mr-2 h-4 w-4" />
+                EDIT
+              </Link>
+            </DropdownMenuItem>
+            <DropdownMenuItem 
+              onClick={() => handleServiceDelete(service)}
+              className="text-red-400 hover:bg-red-500/20 hover:text-red-300 focus:bg-red-500/20 focus:text-red-300 touch-target"
+            >
+              <Trash2 className="mr-2 h-4 w-4" />
+              DELETE
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      )
+    }
+  ]
+
   // Loading skeleton
   if (servicesLoading || groupsLoading) {
     return (
-      <Card className="border-0 bg-gradient-to-br from-gray-900 to-gray-800 shadow-2xl hover:shadow-cyan-500/20 transition-all duration-300">
-        <CardHeader>
-          <CardTitle className="text-gray-100">Network Services</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            <div className="flex gap-4">
-              <Skeleton className="h-10 w-64 bg-gray-700" />
-              <Skeleton className="h-10 w-32 bg-gray-700" />
-              <Skeleton className="h-10 w-32 bg-gray-700" />
-            </div>
-            <div className="space-y-2">
-              {Array.from({ length: 5 }).map((_, i) => (
-                <Skeleton key={i} className="h-12 w-full bg-gray-700" />
-              ))}
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+      <TacticalTable
+        data={[]}
+        columns={tacticalColumns}
+        loading={true}
+        emptyMessage="Loading services data..."
+      />
     )
   }
 
   // Error state
   if (servicesError) {
     return (
-      <Card className="border-0 bg-gradient-to-br from-gray-900 to-gray-800 shadow-2xl hover:shadow-cyan-500/20 transition-all duration-300">
-        <CardHeader>
-          <CardTitle className="text-gray-100">Network Services</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="text-center py-8">
-            <p className="text-red-400 mb-4">Error loading services: {servicesError}</p>
-            <Button onClick={refetch} variant="outline" className="border-cyan-500/30 text-cyan-400 hover:bg-cyan-500/10 hover:border-cyan-500/50 transition-all duration-200">
-              Try Again
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
+      <div className="bg-neutral-900 border border-red-500/50 rounded-lg p-8 text-center">
+        <p className="text-red-500 mb-4 font-mono">SYSTEM ERROR: {servicesError}</p>
+        <TacticalButton onClick={refetch} variant="primary">
+          RETRY OPERATION
+        </TacticalButton>
+      </div>
     )
   }
 
   return (
-    <Card className="border-0 bg-gradient-to-br from-gray-900 to-gray-800 shadow-2xl hover:shadow-cyan-500/20 transition-all duration-300">
-      <CardHeader>
-        <CardTitle className="text-gray-100">Network Services</CardTitle>
-        
-        {/* Enhanced Search and Filter Controls */}
+    <div className="space-y-6">
+      {/* Tactical Search and Filter Controls */}
+      <div className="bg-neutral-900 border border-neutral-700 rounded-lg p-4">
         <div className="flex flex-col gap-4">
           {/* Local Search Bar for Services */}
           <div className="relative w-full">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-400" />
             <Input
-              placeholder="Search services..."
+              placeholder="SEARCH SERVICES..."
               value={filters.search}
               onChange={(e) => setFilters(prev => ({ ...prev, search: e.target.value }))}
-              className="pl-9 touch-target bg-gray-800 border-gray-700 text-gray-300"
+              className="pl-9 touch-target bg-neutral-800 border-neutral-700 text-white placeholder:text-neutral-500 focus:border-orange-500 focus:ring-orange-500"
             />
             {filters.search && (
-              <Button
+              <TacticalButton
                 variant="ghost"
                 size="sm"
                 onClick={() => setFilters(prev => ({ ...prev, search: '' }))}
-                className="absolute right-1 top-1/2 h-7 w-7 -translate-y-1/2 p-0 hover:bg-muted"
+                className="absolute right-1 top-1/2 h-7 w-7 -translate-y-1/2 p-0"
               >
                 <X className="h-3 w-3" />
                 <span className="sr-only">Clear search</span>
-              </Button>
+              </TacticalButton>
             )}
           </div>
           
@@ -502,37 +663,37 @@ export function ServicesTable({
             {/* Bulk Actions - Full width on mobile */}
             {selectedServices.size > 0 && (
               <div className="flex flex-col sm:flex-row gap-2 sm:items-center">
-                <span className="text-sm text-muted-foreground text-center sm:text-left">
-                  {selectedServices.size} selected
+                <span className="text-sm text-neutral-400 text-center sm:text-left font-mono">
+                  {selectedServices.size} SELECTED
                 </span>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="outline" size="sm" className="touch-target w-full sm:w-auto bg-gray-900/50 border-cyan-500/30 text-cyan-400 hover:bg-cyan-500/20 hover:border-cyan-500/50">
-                      Bulk Actions
-                    </Button>
+                    <TacticalButton variant="secondary" size="sm" className="touch-target w-full sm:w-auto">
+                      BULK ACTIONS
+                    </TacticalButton>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-48">
-                    <DropdownMenuItem onClick={handleExportSelected}>
+                  <DropdownMenuContent align="end" className="w-48 bg-neutral-900 border-neutral-700">
+                    <DropdownMenuItem onClick={handleExportSelected} className="text-white hover:text-orange-500">
                       <Download className="mr-2 h-4 w-4" />
-                      Export Selected
+                      EXPORT SELECTED
                     </DropdownMenuItem>
-                    <DropdownMenuItem onClick={handleBulkDelete}>
+                    <DropdownMenuItem onClick={handleBulkDelete} className="text-red-500 hover:text-red-400">
                       <Trash2 className="mr-2 h-4 w-4" />
-                      Delete Selected
+                      DELETE SELECTED
                     </DropdownMenuItem>
                     {groups.length > 0 && (
                       <>
-                        <DropdownMenuItem disabled className="text-xs text-muted-foreground">
+                        <DropdownMenuItem disabled className="text-xs text-neutral-500">
                           <Users className="mr-2 h-4 w-4" />
-                          Move to Group:
+                          MOVE TO GROUP:
                         </DropdownMenuItem>
                         {groups.map(group => (
                           <DropdownMenuItem 
                             key={group.id}
                             onClick={() => handleBulkGroupChange(group.id)}
-                            className="pl-6"
+                            className="pl-6 text-white hover:text-orange-500"
                           >
-                            {group.name}
+                            {group.name.toUpperCase()}
                           </DropdownMenuItem>
                         ))}
                       </>
@@ -543,325 +704,120 @@ export function ServicesTable({
             )}
           </div>
         </div>
-      </CardHeader>
+      </div>
 
-      <CardContent>
-        {services.length === 0 ? (
-          <div className="text-center py-8">
-            {(() => {
-              const emptyState = getEmptyStateMessage(
-                hasActiveFilters,
-                filters.search,
-                activeFilterCount
-              )
-              return (
-                <>
-                  <p className="text-muted-foreground mb-4">
-                    {emptyState.title}
-                  </p>
-                  <p className="text-sm text-muted-foreground mb-4">
-                    {emptyState.description}
-                  </p>
-                  {emptyState.showClearFilters && (
-                    <Button variant="outline" onClick={clearAllFilters} className="bg-gray-900/50 border-cyan-500/30 text-cyan-400 hover:bg-cyan-500/20 hover:border-cyan-500/50">
-                      Clear All Filters
-                    </Button>
-                  )}
-                </>
-              )
-            })()}
+      {/* Tactical Table */}
+      <div className="space-y-4">
+        <TacticalTable
+          data={services}
+          columns={tacticalColumns}
+          loading={false}
+          onRowClick={onServiceSelect}
+          emptyMessage={(() => {
+            const emptyState = getEmptyStateMessage(
+              hasActiveFilters,
+              filters.search,
+              activeFilterCount
+            )
+            return emptyState.title
+          })()}
+        />
+
+        {/* Tactical Pagination */}
+        {services.length > 0 && (
+          <div className="flex flex-col sm:flex-row items-center justify-between pt-4 gap-2 bg-neutral-900 border border-neutral-700 rounded-lg p-4">
+            <div className="text-sm text-neutral-400 order-2 sm:order-1 font-mono">
+              SHOWING {((currentPage - 1) * pageSize) + 1}-{Math.min(currentPage * pageSize, filteredAndSortedServices.length)} OF {filteredAndSortedServices.length} SERVICES
+              {hasActiveFilters && (
+                <span className="ml-1">
+                  (FILTERED FROM {allServices.length} TOTAL)
+                </span>
+              )}
+            </div>
+            <div className="flex gap-2 order-1 sm:order-2">
+              <TacticalButton
+                variant="secondary"
+                size="sm"
+                onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                disabled={currentPage === 1}
+                className="touch-target"
+              >
+                PREVIOUS
+              </TacticalButton>
+              <TacticalButton
+                variant="secondary"
+                size="sm"
+                onClick={() => setCurrentPage(prev => prev + 1)}
+                disabled={currentPage * pageSize >= filteredAndSortedServices.length}
+                className="touch-target"
+              >
+                NEXT
+              </TacticalButton>
+            </div>
           </div>
-        ) : (
-          <>
-            {/* Responsive Table Container with Horizontal Scroll */}
-            <div className="table-responsive">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="w-12 sticky left-0 bg-background z-10">
-                      <Checkbox
-                        checked={selectedServices.size === services.length && services.length > 0}
-                        onCheckedChange={handleSelectAll}
-                        aria-label="Select all services"
-                        className="touch-target"
-                      />
-                    </TableHead>
-                    <TableHead className="min-w-[150px] sticky left-12 bg-background z-10">
-                      <Button 
-                        variant="ghost" 
-                        size="sm" 
-                        onClick={() => handleSort('name')}
-                        className="h-auto p-0 font-medium touch-target"
-                      >
-                        Name
-                        <SortIcon field="name" />
-                      </Button>
-                    </TableHead>
-                    <TableHead className="min-w-[100px]">
-                      <Button 
-                        variant="ghost" 
-                        size="sm" 
-                        onClick={() => handleSort('type')}
-                        className="h-auto p-0 font-medium touch-target"
-                      >
-                        Type
-                        <SortIcon field="type" />
-                      </Button>
-                    </TableHead>
-                    <TableHead className="min-w-[140px] hidden sm:table-cell">IP Addresses</TableHead>
-                    <TableHead className="min-w-[100px] hidden sm:table-cell">Ports</TableHead>
-                    <TableHead className="min-w-[80px] hidden md:table-cell">VLAN</TableHead>
-                    <TableHead className="min-w-[120px] hidden md:table-cell">Domain</TableHead>
-                    <TableHead className="min-w-[120px]">
-                      <Button 
-                        variant="ghost" 
-                        size="sm" 
-                        onClick={() => handleSort('group')}
-                        className="h-auto p-0 font-medium touch-target"
-                      >
-                        Group
-                        <SortIcon field="group" />
-                      </Button>
-                    </TableHead>
-                    <TableHead className="min-w-[100px] hidden lg:table-cell">
-                      <Button 
-                        variant="ghost" 
-                        size="sm" 
-                        onClick={() => handleSort('createdAt')}
-                        className="h-auto p-0 font-medium touch-target"
-                      >
-                        Created
-                        <SortIcon field="createdAt" />
-                      </Button>
-                    </TableHead>
-                    <TableHead className="w-12 sticky right-0 bg-background z-10">Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {services.map((service) => (
-                    <TableRow 
-                      key={service.id}
-                      data-state={selectedServices.has(service.id) ? "selected" : undefined}
-                      className="hover:bg-muted/50"
-                    >
-                      <TableCell className="sticky left-0 bg-background z-10">
-                        <Checkbox
-                          checked={selectedServices.has(service.id)}
-                          onCheckedChange={(checked) => 
-                            handleSelectService(service.id, checked as boolean)
-                          }
-                          aria-label={`Select ${service.name}`}
-                          className="touch-target"
-                        />
-                      </TableCell>
-                      <TableCell className="font-medium sticky left-12 bg-background z-10">
-                        <Link 
-                          href={`/services/${service.id}`}
-                          className="hover:underline touch-target block"
-                          onClick={() => onServiceSelect?.(service)}
-                        >
-                          <HighlightedText 
-                            text={service.name} 
-                            searchTerm={filters.search} 
-                          />
-                        </Link>
-                      </TableCell>
-                      <TableCell>
-                        <span className="inline-flex items-center rounded-full px-2 py-1 text-xs font-medium bg-secondary text-secondary-foreground">
-                          {formatServiceType(service.type)}
-                        </span>
-                      </TableCell>
-                      <TableCell className="font-mono text-sm hidden sm:table-cell">
-                        <div className="max-w-[120px] truncate" title={service.ipAddress || ''}>
-                          {service.ipAddress ? formatIpAddresses(service.ipAddress.split(',')) : "None"}
-                        </div>
-                      </TableCell>
-                      <TableCell className="font-mono text-sm hidden sm:table-cell">
-                        <div className="max-w-[80px] truncate" title={service.internalPorts?.join(', ') || ''}>
-                          {service.internalPorts?.join('; ') || 'None'}
-                        </div>
-                      </TableCell>
-                      <TableCell className="hidden md:table-cell">
-                        {service.vlan ? (
-                          <span className="font-mono text-sm">{service.vlan}</span>
-                        ) : (
-                          <span className="text-muted-foreground">-</span>
-                        )}
-                      </TableCell>
-                      <TableCell className="hidden md:table-cell">
-                        {service.domain ? (
-                          <div className="font-mono text-sm max-w-[100px] truncate" title={service.domain}>
-                            {service.domain}
-                          </div>
-                        ) : (
-                          <span className="text-muted-foreground">-</span>
-                        )}
-                      </TableCell>
-                      <TableCell>
-                        <div className="max-w-[100px] truncate" title={groupsMap[service.groupId]?.name || 'Unknown'}>
-                          {groupsMap[service.groupId]?.name || 'Unknown'}
-                        </div>
-                      </TableCell>
-                      <TableCell className="text-muted-foreground hidden lg:table-cell">
-                        {new Date(service.createdAt).toLocaleDateString()}
-                      </TableCell>
-                      <TableCell className="sticky right-0 bg-background z-10">
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="sm" className="touch-target">
-                              <MoreHorizontal className="h-4 w-4" />
-                              <span className="sr-only">Open menu</span>
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end" className="w-40">
-                            <DropdownMenuItem asChild>
-                              <Link href={`/services/${service.id}`} className="touch-target">
-                                <Eye className="mr-2 h-4 w-4" />
-                                View
-                              </Link>
-                            </DropdownMenuItem>
-                            <DropdownMenuItem asChild>
-                              <Link href={`/services/${service.id}/edit`} className="touch-target">
-                                <Edit className="mr-2 h-4 w-4" />
-                                Edit
-                              </Link>
-                            </DropdownMenuItem>
-                            <DropdownMenuItem 
-                              onClick={() => handleServiceDelete(service)}
-                              className="text-destructive touch-target"
-                            >
-                              <Trash2 className="mr-2 h-4 w-4" />
-                              Delete
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
-
-            {/* Pagination - Mobile Responsive */}
-            <div className="flex flex-col sm:flex-row items-center justify-between pt-4 gap-2">
-              <div className="text-sm text-muted-foreground order-2 sm:order-1">
-                Showing {((currentPage - 1) * pageSize) + 1}-{Math.min(currentPage * pageSize, filteredAndSortedServices.length)} of {filteredAndSortedServices.length} services
-                {hasActiveFilters && (
-                  <span className="ml-1">
-                    (filtered from {allServices.length} total)
-                  </span>
-                )}
-              </div>
-              <div className="flex gap-2 order-1 sm:order-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
-                  disabled={currentPage === 1}
-                  className="touch-target"
-                >
-                  Previous
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setCurrentPage(prev => prev + 1)}
-                  disabled={currentPage * pageSize >= filteredAndSortedServices.length}
-                  className="touch-target"
-                >
-                  Next
-                </Button>
-              </div>
-            </div>
-          </>
         )}
-      </CardContent>
 
-      {/* Individual Service Delete Confirmation Dialog */}
-      <ConfirmationDialog
+        {/* Empty state with clear filters option */}
+        {services.length === 0 && hasActiveFilters && (
+          <div className="bg-neutral-900 border border-neutral-700 rounded-lg p-8 text-center">
+            <p className="text-neutral-400 mb-4 font-mono">NO SERVICES MATCH CURRENT FILTERS</p>
+            <p className="text-sm text-neutral-500 mb-4">
+              Try adjusting your search criteria or clearing filters to see more results.
+            </p>
+            <TacticalButton variant="secondary" onClick={clearAllFilters}>
+              CLEAR ALL FILTERS
+            </TacticalButton>
+          </div>
+        )}
+      </div>
+
+      {/* Tactical Confirmation Dialogs */}
+      <TacticalConfirmationModal
         open={deleteDialogOpen}
         onOpenChange={setDeleteDialogOpen}
         title="Delete Service"
         description={
-          serviceToDelete ? (
-            <>
-              Are you sure you want to delete <strong>{serviceToDelete.name}</strong>? 
-              This action cannot be undone and will permanently remove the service 
-              from your network inventory.
-            </>
-          ) : (
-            "Are you sure you want to delete this service?"
-          )
+          serviceToDelete 
+            ? `Are you sure you want to delete "${serviceToDelete.name}"? This action cannot be undone and will permanently remove the service from your network inventory.`
+            : "Are you sure you want to delete this service?"
         }
         confirmText="Delete Service"
         cancelText="Cancel"
         onConfirm={confirmServiceDelete}
-        loading={deleteService.loading}
-        variant="destructive"
+        variant="danger"
       />
 
-      {/* Bulk Delete Confirmation Dialog */}
-      <ConfirmationDialog
+      <TacticalConfirmationModal
         open={bulkDeleteDialogOpen}
         onOpenChange={setBulkDeleteDialogOpen}
         title="Delete Multiple Services"
-        description={
-          bulkOperations.loading ? (
-            <>
-              <div className="flex items-center space-x-2 mb-2">
-                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-destructive"></div>
-                <span>Deleting services...</span>
-              </div>
-              <p className="text-sm text-muted-foreground">
-                Please wait while we delete {selectedServices.size} services. This may take a moment.
-              </p>
-            </>
-          ) : (
-            <>
-              Are you sure you want to delete <strong>{selectedServices.size}</strong> selected services? 
-              This action cannot be undone and will permanently remove all selected services 
-              from your network inventory.
-            </>
-          )
-        }
-        confirmText={bulkOperations.loading ? "Deleting..." : `Delete ${selectedServices.size} Services`}
+        description={`Are you sure you want to delete ${selectedServices.size} selected services? This action cannot be undone and will permanently remove all selected services from your network inventory.`}
+        confirmText={`Delete ${selectedServices.size} Services`}
         cancelText="Cancel"
         onConfirm={confirmBulkDelete}
-        loading={bulkOperations.loading}
-        variant="destructive"
+        variant="danger"
       />
 
-      {/* Bulk Group Change Confirmation Dialog */}
-      <ConfirmationDialog
+      <TacticalConfirmationModal
         open={bulkGroupChangeDialogOpen}
         onOpenChange={setBulkGroupChangeDialogOpen}
         title="Move Services to Group"
-        description={
-          bulkOperations.loading ? (
-            <>
-              <div className="flex items-center space-x-2 mb-2">
-                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary"></div>
-                <span>Moving services...</span>
-              </div>
-              <p className="text-sm text-muted-foreground">
-                Please wait while we move {selectedServices.size} services to "{groupsMap[targetGroupId]?.name}". This may take a moment.
-              </p>
-            </>
-          ) : (
-            <>
-              Are you sure you want to move <strong>{selectedServices.size}</strong> selected services 
-              to the group <strong>"{groupsMap[targetGroupId]?.name}"</strong>?
-              <div className="mt-2 p-2 bg-muted rounded text-sm">
-                This will update the group assignment for all selected services.
-              </div>
-            </>
-          )
-        }
-        confirmText={bulkOperations.loading ? "Moving..." : `Move ${selectedServices.size} Services`}
+        description={`Are you sure you want to move ${selectedServices.size} selected services to the group "${groupsMap[targetGroupId]?.name}"? This will update the group assignment for all selected services.`}
+        confirmText={`Move ${selectedServices.size} Services`}
         cancelText="Cancel"
         onConfirm={confirmBulkGroupChange}
-        loading={bulkOperations.loading}
+        variant="primary"
       />
-    </Card>
+
+      {/* Service Detail Modal */}
+      <ServiceDetailModal
+        service={selectedServiceForDetail}
+        group={selectedServiceForDetail ? groupsMap[selectedServiceForDetail.groupId] : undefined}
+        open={detailModalOpen}
+        onOpenChange={setDetailModalOpen}
+        onEdit={onServiceEdit}
+        onDelete={handleServiceDelete}
+      />
+    </div>
   )
 }

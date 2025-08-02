@@ -14,6 +14,17 @@ const nextConfig = {
 
   // Webpack optimizations
   webpack: (config, { dev, isServer }) => {
+    // Exclude tactical-command directory from build
+    config.resolve.alias = {
+      ...config.resolve.alias,
+    }
+    
+    // Add ignore pattern for tactical-command directory
+    config.module.rules.push({
+      test: /tactical-command/,
+      use: 'null-loader'
+    })
+
     // Production optimizations
     if (!dev) {
       // Enable tree shaking for better bundle size

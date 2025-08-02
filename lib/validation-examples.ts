@@ -103,8 +103,8 @@ export function prepareServiceForSubmission(formData: CreateServiceInput) {
   // Transform data if needed (e.g., ensure arrays are properly formatted)
   return {
     ...result.data,
-    ip_addresses: result.data.ip_addresses.map(ip => ip.trim()),
-    ports: result.data.ports.sort((a, b) => a - b), // Sort ports
+    ipAddress: result.data.ipAddress ? result.data.ipAddress.split(',').map(ip => ip.trim()).join(',') : '',
+    internalPorts: result.data.internalPorts.sort((a, b) => a - b), // Sort ports
     name: result.data.name.toLowerCase() // Normalize name
   };
 }

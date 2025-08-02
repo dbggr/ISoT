@@ -42,10 +42,10 @@ export function matchesServiceSearch(service: NetworkService, searchTerm: string
   return (
     service.name.toLowerCase().includes(term) ||
     service.type.toLowerCase().includes(term) ||
-    service.ip_addresses.some(ip => ip.toLowerCase().includes(term)) ||
-    service.ports.some(port => port.toString().includes(term)) ||
+    (service.ipAddress && service.ipAddress.toLowerCase().includes(term)) ||
+    (service.internalPorts && service.internalPorts.some(port => port.toString().includes(term))) ||
     (service.domain && service.domain.toLowerCase().includes(term)) ||
-    (service.vlan_id !== undefined && service.vlan_id.toString().includes(term))
+    (service.vlan !== undefined && service.vlan.toString().includes(term))
   )
 }
 
@@ -90,14 +90,14 @@ export function filterServices(
     }
 
     // Group filter
-    if (filters.groupId && service.group_id !== filters.groupId) {
+    if (filters.groupId && service.groupId !== filters.groupId) {
       return false
     }
 
     // VLAN filter
     if (filters.vlanId) {
       const vlanFilter = parseInt(filters.vlanId)
-      if (isNaN(vlanFilter) || service.vlan_id !== vlanFilter) {
+      if (isNaN(vlanFilter) || service.vlan !== vlanFilter.toString()) {
         return false
       }
     }
@@ -105,7 +105,7 @@ export function filterServices(
     // IP address filter
     if (filters.ipAddress) {
       const ipFilter = filters.ipAddress.toLowerCase()
-      if (!service.ip_addresses.some(ip => ip.toLowerCase().includes(ipFilter))) {
+      if (!service.ipAddress || !service.ipAddress.toLowerCase().includes(ipFilter)) {
         return false
       }
     }
@@ -120,7 +120,7 @@ export function filterServices(
 
     // Port range filter
     if (filters.portRange) {
-      if (!matchesPortRange(service.ports, filters.portRange)) {
+      if (!matchesPortRange(service.internalPorts || [], filters.portRange)) {
         return false
       }
     }
@@ -197,17 +197,17 @@ function getServiceRelevanceScore(service: NetworkService, searchTerm: string): 
   }
   
   // IP address match
-  if (service.ip_addresses.some(ip => ip.includes(searchTerm))) {
+  if (service.ipAddress && service.ipAddress.includes(searchTerm)) {
     score += 10
   }
   
   // Port match
-  if (service.ports.some(port => port.toString().includes(searchTerm))) {
+  if (service.internalPorts && service.internalPorts.some(port => port.toString().includes(searchTerm))) {
     score += 5
   }
   
   // VLAN match
-  if (service.vlan_id !== undefined && service.vlan_id.toString().includes(searchTerm)) {
+  if (service.vlan !== undefined && service.vlan.toString().includes(searchTerm)) {
     score += 5
   }
   

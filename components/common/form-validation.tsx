@@ -214,18 +214,18 @@ export function FormSubmissionFeedback({
 
   if (state.error) {
     return (
-      <Alert variant="destructive" className={className}>
-        <AlertCircle className="h-4 w-4" />
-        <AlertDescription>{state.error}</AlertDescription>
+      <Alert variant="destructive" className={cn("border-red-500/30 bg-red-500/10 text-red-400", className)}>
+        <AlertCircle className="h-4 w-4 text-red-500" />
+        <AlertDescription className="text-red-400">{state.error}</AlertDescription>
       </Alert>
     )
   }
 
   if (state.success) {
     return (
-      <Alert className={cn("border-green-200 bg-green-50 text-green-800", className)}>
-        <CheckCircle className="h-4 w-4 text-green-600" />
-        <AlertDescription>{state.success}</AlertDescription>
+      <Alert className={cn("border-green-500/30 bg-green-500/10 text-green-400", className)}>
+        <CheckCircle className="h-4 w-4 text-green-500" />
+        <AlertDescription className="text-green-400">{state.success}</AlertDescription>
       </Alert>
     )
   }

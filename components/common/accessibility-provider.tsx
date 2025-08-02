@@ -17,7 +17,9 @@ export function AccessibilityProvider({ children }: AccessibilityProviderProps) 
     
     // Add skip link to main content
     const skipLink = createSkipLink('main-content', 'Skip to main content')
-    document.body.insertBefore(skipLink, document.body.firstChild)
+    if (skipLink) {
+      document.body.insertBefore(skipLink, document.body.firstChild)
+    }
     
     // Add live region for announcements
     const liveRegion = document.createElement('div')

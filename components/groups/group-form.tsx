@@ -6,6 +6,7 @@ import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 
 import { Button } from "@/components/ui/button"
+import { Card, CardContent } from "@/components/ui/card"
 import {
   Form,
   FormControl,
@@ -129,7 +130,7 @@ export function GroupForm({ group, mode, onSuccess, onCancel }: GroupFormProps) 
         throw new Error("Group ID is required for update")
       }
 
-      formSubmission.setSuccess(mode === 'create' ? 'Group created successfully' : 'Group updated successfully')
+      // Success message is handled by toast notification above
 
       if (onSuccess) {
         onSuccess(result)
@@ -173,99 +174,104 @@ export function GroupForm({ group, mode, onSuccess, onCancel }: GroupFormProps) 
   const isFormDirty = form.formState.isDirty
 
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="form-responsive space-y-6">
-        <FormField
-          control={form.control}
-          name="name"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel className="text-gray-200">Group Name</FormLabel>
-              <FormControl>
-                <Input 
-                  placeholder="Enter group name" 
-                  {...field}
-                  disabled={formSubmission.state.isSubmitting}
-                  className="touch-target bg-gray-800 border-gray-700 text-gray-300 placeholder:text-gray-500 focus:border-pink-500 focus:ring-pink-500/20"
-                />
-              </FormControl>
-              <FormDescription className="text-gray-400 text-responsive-sm">
-                A unique name for this group. This will be used to organize services.
-              </FormDescription>
-              <ValidationDisplay state={nameValidation} />
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+    <Card className="bg-neutral-900 border-neutral-700">
+      <CardContent className="p-6">
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="form-responsive space-y-6">
+            <FormField
+              control={form.control}
+              name="name"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-neutral-300 tracking-wider text-sm font-medium">GROUP NAME</FormLabel>
+                  <FormControl>
+                    <Input 
+                      placeholder="e.g., storage-services" 
+                      {...field}
+                      disabled={formSubmission.state.isSubmitting}
+                      className="bg-neutral-800 border-neutral-700 text-white placeholder:text-neutral-500 focus:border-orange-500 focus:ring-orange-500"
+                    />
+                  </FormControl>
+                  <FormDescription className="text-neutral-400 text-xs">
+                    A unique name for this group. This will be used to organize services.
+                  </FormDescription>
+                  <ValidationDisplay state={nameValidation} />
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-        <FormField
-          control={form.control}
-          name="description"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel className="text-gray-200">Description</FormLabel>
-              <FormControl>
-                <Textarea
-                  placeholder="Enter group description (optional)"
-                  className="resize-none touch-target bg-gray-800 border-gray-700 text-gray-300 placeholder:text-gray-500 focus:border-pink-500 focus:ring-pink-500/20"
-                  rows={3}
-                  {...field}
-                  disabled={formSubmission.state.isSubmitting}
-                />
-              </FormControl>
-              <FormDescription className="text-gray-400 text-responsive-sm">
-                Optional description to explain the purpose of this group.
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+            <FormField
+              control={form.control}
+              name="description"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-neutral-300 tracking-wider text-sm font-medium">DESCRIPTION (OPTIONAL)</FormLabel>
+                  <FormControl>
+                    <Textarea
+                      placeholder="Enter group description (optional)"
+                      className="resize-none bg-neutral-800 border-neutral-700 text-white placeholder:text-neutral-500 focus:border-orange-500 focus:ring-orange-500"
+                      rows={3}
+                      {...field}
+                      disabled={formSubmission.state.isSubmitting}
+                    />
+                  </FormControl>
+                  <FormDescription className="text-neutral-400 text-xs">
+                    Optional description to explain the purpose of this group.
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-        {/* Form Submission Feedback */}
-        <FormSubmissionFeedback state={formSubmission.state} />
+            {/* Form Submission Feedback */}
+            <FormSubmissionFeedback state={formSubmission.state} />
 
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-end space-y-2 sm:space-y-0 sm:space-x-2 pt-4">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={handleCancel}
-            disabled={formSubmission.state.isSubmitting}
-            className="touch-target w-full sm:w-auto bg-gray-900/50 border-gray-700 text-gray-300 hover:bg-gray-800/50 hover:border-gray-600 transition-all duration-200"
-          >
-            Cancel
-          </Button>
-          <Button 
-            type="submit" 
-            disabled={formSubmission.state.isSubmitting || !form.formState.isValid}
-            className="touch-target w-full sm:w-auto bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white shadow-lg transition-all duration-200"
-          >
-            {formSubmission.state.isSubmitting ? (
-              <>
-                <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
-                {mode === 'create' ? 'Creating...' : 'Updating...'}
-              </>
-            ) : (
-              mode === 'create' ? 'Create Group' : 'Update Group'
+            {/* Form Actions - Mobile Responsive */}
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-end space-y-2 sm:space-y-0 sm:space-x-2 pt-6 border-t border-neutral-700">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={handleCancel}
+                disabled={formSubmission.state.isSubmitting}
+                className="bg-neutral-800 border-neutral-700 text-neutral-300 hover:bg-neutral-700 hover:text-white w-full sm:w-auto"
+              >
+                CANCEL
+              </Button>
+              <Button 
+                type="submit" 
+                disabled={formSubmission.state.isSubmitting || !form.formState.isValid}
+                className="bg-orange-500 hover:bg-orange-600 text-white border-orange-500 w-full sm:w-auto font-medium tracking-wider"
+              >
+                {formSubmission.state.isSubmitting ? (
+                  <>
+                    <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                    {mode === 'create' ? 'CREATING...' : 'UPDATING...'}
+                  </>
+                ) : (
+                  mode === 'create' ? 'CREATE GROUP' : 'UPDATE GROUP'
+                )}
+              </Button>
+            </div>
+
+            {/* Show warning if form is dirty and user tries to navigate away */}
+            {isFormDirty && (
+              <div className="text-sm text-yellow-400 bg-yellow-500/10 border border-yellow-500/20 rounded-lg p-3">
+                ⚠️ You have unsaved changes. Make sure to save before leaving this page.
+              </div>
             )}
-          </Button>
-        </div>
 
-        {/* Show warning if form is dirty and user tries to navigate away */}
-        {isFormDirty && (
-          <div className="text-sm text-yellow-400 text-responsive-sm bg-yellow-500/10 border border-yellow-500/20 rounded-lg p-3">
-            ⚠️ You have unsaved changes. Make sure to save before leaving this page.
-          </div>
-        )}
-
-        {/* Unsaved Changes Dialog */}
-        <UnsavedChangesDialog
-          open={showUnsavedDialog}
-          onOpenChange={setShowUnsavedDialog}
-          onSave={handleSaveChanges}
-          onDiscard={handleDiscardChanges}
-          loading={formSubmission.state.isSubmitting}
-        />
-      </form>
-    </Form>
+            {/* Unsaved Changes Dialog */}
+            <UnsavedChangesDialog
+              open={showUnsavedDialog}
+              onOpenChange={setShowUnsavedDialog}
+              onSave={handleSaveChanges}
+              onDiscard={handleDiscardChanges}
+              loading={formSubmission.state.isSubmitting}
+            />
+          </form>
+        </Form>
+      </CardContent>
+    </Card>
   )
 }
