@@ -314,7 +314,7 @@ describe('useBulkServiceOperations', () => {
     expect(result.current.error).toBe(null)
     expect(mockApiClient.updateService).toHaveBeenCalledTimes(3)
     ids.forEach(id => {
-      expect(mockApiClient.updateService).toHaveBeenCalledWith(id, { group_id: newGroupId })
+      expect(mockApiClient.updateService).toHaveBeenCalledWith(id, { groupId: newGroupId })
     })
   })
 })

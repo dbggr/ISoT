@@ -26,11 +26,12 @@ describe('Service Validation Schemas', () => {
     const validServiceData = {
       name: 'test-service',
       type: 'web' as const,
-      ip_addresses: ['192.168.1.1'],
-      ports: [80, 443],
-      vlan_id: 100,
+      ipAddress: '192.168.1.1',
+      internalPorts: [80],
+      externalPorts: [443],
+      vlan: 100,
       domain: 'example.com',
-      group_id: '123e4567-e89b-12d3-a456-426614174000'
+      groupId: '123e4567-e89b-12d3-a456-426614174000'
     };
 
     it('should validate valid service data', () => {
@@ -74,18 +75,18 @@ describe('Service Validation Schemas', () => {
     it('should require at least one IP address', () => {
       const result = createServiceSchema.safeParse({
         ...validServiceData,
-        ip_addresses: []
+        ipAddress: undefined
       });
       expect(result.success).toBe(false);
       if (!result.success) {
-        expect(result.error.issues[0].message).toBe('At least one IP address is required');
+        expect(result.error.issues[0].message).toBe('Required');
       }
     });
 
     it('should validate IP address format', () => {
       const result = createServiceSchema.safeParse({
         ...validServiceData,
-        ip_addresses: ['invalid-ip']
+        ipAddress: 'invalid-ip'
       });
       expect(result.success).toBe(false);
       if (!result.success) {
@@ -96,18 +97,20 @@ describe('Service Validation Schemas', () => {
     it('should require at least one port', () => {
       const result = createServiceSchema.safeParse({
         ...validServiceData,
-        ports: []
+        internalPorts: undefined,
+        externalPorts: undefined
       });
       expect(result.success).toBe(false);
       if (!result.success) {
-        expect(result.error.issues[0].message).toBe('At least one port is required');
+        expect(result.error.issues[0].message).toBe('Required');
       }
     });
 
     it('should validate port range', () => {
       const result = createServiceSchema.safeParse({
         ...validServiceData,
-        ports: [0, 65536]
+        internalPorts: [0, 65536],
+        externalPorts: [0, 65536]
       });
       expect(result.success).toBe(false);
       if (!result.success) {
@@ -120,7 +123,7 @@ describe('Service Validation Schemas', () => {
     it('should validate VLAN ID range', () => {
       const result = createServiceSchema.safeParse({
         ...validServiceData,
-        vlan_id: 5000
+        vlan: 5000
       });
       expect(result.success).toBe(false);
       if (!result.success) {
@@ -142,7 +145,7 @@ describe('Service Validation Schemas', () => {
     it('should require valid group UUID', () => {
       const result = createServiceSchema.safeParse({
         ...validServiceData,
-        group_id: 'invalid-uuid'
+        groupId: 'invalid-uuid'
       });
       expect(result.success).toBe(false);
       if (!result.success) {
@@ -154,9 +157,10 @@ describe('Service Validation Schemas', () => {
       const minimalData = {
         name: 'test-service',
         type: 'web' as const,
-        ip_addresses: ['192.168.1.1'],
-        ports: [80],
-        group_id: '123e4567-e89b-12d3-a456-426614174000'
+        ipAddress: '192.168.1.1',
+        internalPorts: [80],
+        externalPorts: [80],
+        groupId: '123e4567-e89b-12d3-a456-426614174000'
       };
       const result = createServiceSchema.safeParse(minimalData);
       expect(result.success).toBe(true);
@@ -344,9 +348,10 @@ describe('Validation Helper Functions', () => {
       const validData = {
         name: 'test-service',
         type: 'web',
-        ip_addresses: ['192.168.1.1'],
-        ports: [80],
-        group_id: '123e4567-e89b-12d3-a456-426614174000'
+        ipAddress: '192.168.1.1',
+        internalPorts: [80],
+        externalPorts: [80],
+        groupId: '123e4567-e89b-12d3-a456-426614174000'
       };
       const result = validateServiceForm(validData);
       expect(result.success).toBe(true);

@@ -45,6 +45,7 @@ describe('NetworkServiceRepository', () => {
         id TEXT PRIMARY KEY,
         group_id TEXT NOT NULL,
         name TEXT NOT NULL,
+        type TEXT NOT NULL,
         domain TEXT NOT NULL,
         internal_ports TEXT,
         external_ports TEXT,
@@ -85,6 +86,7 @@ describe('NetworkServiceRepository', () => {
       const serviceData: CreateNetworkServiceDto = {
         groupId: testGroupId,
         name: 'test-service',
+        type: 'web',
         domain: 'test.example.com',
         internalPorts: [8080, 8443],
         externalPorts: [80, 443],
@@ -99,6 +101,7 @@ describe('NetworkServiceRepository', () => {
       expect(result).toMatchObject({
         groupId: testGroupId,
         name: 'test-service',
+        type: 'web',
         domain: 'test.example.com',
         internalPorts: [8080, 8443],
         externalPorts: [80, 443],
@@ -116,6 +119,7 @@ describe('NetworkServiceRepository', () => {
       const serviceData: CreateNetworkServiceDto = {
         groupId: testGroupId,
         name: 'minimal-service',
+        type: 'api',
         domain: 'minimal.example.com',
         internalPorts: [3000],
         externalPorts: [3000]
@@ -126,6 +130,7 @@ describe('NetworkServiceRepository', () => {
       expect(result).toMatchObject({
         groupId: testGroupId,
         name: 'minimal-service',
+        type: 'api',
         domain: 'minimal.example.com',
         internalPorts: [3000],
         externalPorts: [3000],
@@ -140,6 +145,7 @@ describe('NetworkServiceRepository', () => {
       const serviceData: CreateNetworkServiceDto = {
         groupId: 'non-existent-group',
         name: 'test-service',
+        type: 'web',
         domain: 'test.example.com',
         internalPorts: [8080],
         externalPorts: [80]
@@ -154,6 +160,7 @@ describe('NetworkServiceRepository', () => {
       const serviceData: CreateNetworkServiceDto = {
         groupId: testGroupId,
         name: 'findable-service',
+        type: 'web',
         domain: 'findable.example.com',
         internalPorts: [8080],
         externalPorts: [80],
@@ -179,6 +186,7 @@ describe('NetworkServiceRepository', () => {
         {
           groupId: testGroupId,
           name: 'web-service',
+          type: 'web',
           domain: 'web.example.com',
           internalPorts: [8080],
           externalPorts: [80],
@@ -189,6 +197,7 @@ describe('NetworkServiceRepository', () => {
         {
           groupId: testGroupId,
           name: 'api-service',
+          type: 'api',
           domain: 'api.example.com',
           internalPorts: [3000],
           externalPorts: [443],
@@ -199,6 +208,7 @@ describe('NetworkServiceRepository', () => {
         {
           groupId: testGroupId,
           name: 'db-service',
+          type: 'database',
           domain: 'db.example.com',
           internalPorts: [5432],
           externalPorts: [5432],
@@ -286,6 +296,7 @@ describe('NetworkServiceRepository', () => {
       const serviceData: CreateNetworkServiceDto = {
         groupId: testGroupId,
         name: 'updatable-service',
+        type: 'web',
         domain: 'updatable.example.com',
         internalPorts: [8080],
         externalPorts: [80],
@@ -356,6 +367,7 @@ describe('NetworkServiceRepository', () => {
       const serviceData: CreateNetworkServiceDto = {
         groupId: testGroupId,
         name: 'deletable-service',
+        type: 'web',
         domain: 'deletable.example.com',
         internalPorts: [8080],
         externalPorts: [80]
@@ -391,6 +403,7 @@ describe('NetworkServiceRepository', () => {
       await repository.create({
         groupId: testGroupId,
         name: 'service-1',
+        type: 'web',
         domain: 'service1.example.com',
         internalPorts: [8080],
         externalPorts: [80]
@@ -399,6 +412,7 @@ describe('NetworkServiceRepository', () => {
       await repository.create({
         groupId: testGroupId,
         name: 'service-2',
+        type: 'api',
         domain: 'service2.example.com',
         internalPorts: [3000],
         externalPorts: [3000]
@@ -407,6 +421,7 @@ describe('NetworkServiceRepository', () => {
       await repository.create({
         groupId: secondGroupId,
         name: 'service-3',
+        type: 'database',
         domain: 'service3.example.com',
         internalPorts: [5000],
         externalPorts: [5000]
@@ -441,6 +456,7 @@ describe('NetworkServiceRepository', () => {
       const serviceData: CreateNetworkServiceDto = {
         groupId: testGroupId,
         name: 'empty-arrays-service',
+        type: 'web',
         domain: 'empty.example.com',
         internalPorts: [],
         externalPorts: [],
@@ -461,13 +477,14 @@ describe('NetworkServiceRepository', () => {
 
       db.prepare(`
         INSERT INTO network_services (
-          id, group_id, name, domain, internal_ports, external_ports, tags,
+          id, group_id, name, type, domain, internal_ports, external_ports, tags,
           created_at, updated_at
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       `).run(
         serviceId,
         testGroupId,
         'malformed-json-service',
+        'web',
         'malformed.example.com',
         'invalid-json',
         '[1,2,3]',
@@ -491,13 +508,14 @@ describe('NetworkServiceRepository', () => {
 
       db.prepare(`
         INSERT INTO network_services (
-          id, group_id, name, domain, internal_ports, external_ports, tags,
+          id, group_id, name, type, domain, internal_ports, external_ports, tags,
           created_at, updated_at
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       `).run(
         serviceId,
         testGroupId,
         'mixed-types-service',
+        'web',
         'mixed.example.com',
         JSON.stringify([8080, 'invalid', 9000, null, 9001]),
         JSON.stringify([80, 443]),

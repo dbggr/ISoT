@@ -165,8 +165,8 @@ describe('Enhanced Form Validation Components', () => {
       render(<FormSubmissionFeedback state={state} />)
       
       expect(screen.getByText('Submission failed')).toBeInTheDocument()
-      // The alert has border-destructive class
-      expect(screen.getByRole('alert')).toHaveClass('border-destructive/50')
+      // The alert has border-red-500/30 class for error state
+      expect(screen.getByRole('alert')).toHaveClass('border-red-500/30')
     })
 
     it('shows success state', () => {
@@ -178,8 +178,8 @@ describe('Enhanced Form Validation Components', () => {
       render(<FormSubmissionFeedback state={state} />)
       
       expect(screen.getByText('Submission successful')).toBeInTheDocument()
-      // The alert has border-green-200 class
-      expect(screen.getByRole('alert')).toHaveClass('border-green-200')
+      // The alert has border-green-500/30 class for success state
+      expect(screen.getByRole('alert')).toHaveClass('border-green-500/30')
     })
   })
 })

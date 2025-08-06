@@ -259,6 +259,11 @@ export class SQLiteNetworkServiceRepository implements NetworkServiceRepository 
       values.push(updates.name);
     }
 
+    if (updates.type !== undefined) {
+      updateFields.push('type = ?');
+      values.push(updates.type);
+    }
+
     if (updates.domain !== undefined) {
       updateFields.push('domain = ?');
       values.push(updates.domain);
@@ -308,7 +313,7 @@ export class SQLiteNetworkServiceRepository implements NetworkServiceRepository 
         UPDATE network_services
         SET ${updateFields.join(', ')}
         WHERE id = ?
-        RETURNING id, group_id, name, domain, internal_ports, external_ports,
+        RETURNING id, group_id, name, type, domain, internal_ports, external_ports,
                   vlan, cidr, ip_address, tags, created_at, updated_at
       `);
 
@@ -344,7 +349,7 @@ export class SQLiteNetworkServiceRepository implements NetworkServiceRepository 
   async findByGroupId(groupId: string): Promise<NetworkService[]> {
     try {
       const stmt = this.db.prepare(`
-        SELECT id, group_id, name, domain, internal_ports, external_ports,
+        SELECT id, group_id, name, type, domain, internal_ports, external_ports,
                vlan, cidr, ip_address, tags, created_at, updated_at
         FROM network_services
         WHERE group_id = ?

@@ -86,22 +86,22 @@ describe('GroupsTable', () => {
     
     expect(screen.getByText('Test Group 1')).toBeInTheDocument()
     expect(screen.getByText('Test Group 2')).toBeInTheDocument()
-    // Use getAllByText since the description appears in multiple places (mobile and desktop)
-    expect(screen.getAllByText('First test group')).toHaveLength(2)
-    expect(screen.getAllByText('Second test group')).toHaveLength(2)
+    // Check for descriptions (only appears once in the table)
+    expect(screen.getByText('First test group')).toBeInTheDocument()
+    expect(screen.getByText('Second test group')).toBeInTheDocument()
   })
 
   it('displays service counts correctly', () => {
     render(<GroupsTable groups={mockGroups} />)
     
-    expect(screen.getByText('0 services')).toBeInTheDocument()
-    expect(screen.getByText('1 services')).toBeInTheDocument()
+    // Service counts are displayed as badges with just the number - both groups show 0 since services hook is mocked to return empty array
+    expect(screen.getAllByText('0')).toHaveLength(2) // Both groups show 0
   })
 
   it('filters groups based on search term', async () => {
     render(<GroupsTable groups={mockGroups} />)
     
-    const searchInput = screen.getByPlaceholderText('Search groups...')
+    const searchInput = screen.getByPlaceholderText('SEARCH GROUPS...')
     fireEvent.change(searchInput, { target: { value: 'First' } })
     
     await waitFor(() => {
@@ -110,15 +110,19 @@ describe('GroupsTable', () => {
     })
   })
 
-  it('sorts groups by name', async () => {
+  it('displays groups in table format', async () => {
     render(<GroupsTable groups={mockGroups} />)
     
-    const nameHeader = screen.getByRole('button', { name: /name/i })
-    fireEvent.click(nameHeader)
-    
-    // Check that both groups are still present (sorting doesn't change the order in this case)
+    // Check that both groups are present
     expect(screen.getByText('Test Group 1')).toBeInTheDocument()
     expect(screen.getByText('Test Group 2')).toBeInTheDocument()
+    
+    // Check table headers
+    expect(screen.getByText('GROUP NAME')).toBeInTheDocument()
+    expect(screen.getByText('DESCRIPTION')).toBeInTheDocument()
+    expect(screen.getByText('SERVICES')).toBeInTheDocument()
+    expect(screen.getByText('CREATED')).toBeInTheDocument()
+    expect(screen.getByText('ACTIONS')).toBeInTheDocument()
   })
 
   it('shows delete confirmation dialog', async () => {
@@ -130,7 +134,7 @@ describe('GroupsTable', () => {
     fireEvent.click(dropdownTriggers[0])
     
     // Click delete option - use getAllByText since there are multiple delete buttons
-    const deleteButtons = screen.getAllByText('Delete')
+    const deleteButtons = screen.getAllByText('DELETE')
     fireEvent.click(deleteButtons[0])
     
     // Should show confirmation dialog
@@ -147,7 +151,7 @@ describe('GroupsTable', () => {
     fireEvent.click(dropdownTriggers[0])
     
     // Click delete option - use getAllByText since there are multiple delete buttons
-    const deleteButtons = screen.getAllByText('Delete')
+    const deleteButtons = screen.getAllByText('DELETE')
     fireEvent.click(deleteButtons[0])
     
     // Confirm deletion
@@ -160,25 +164,24 @@ describe('GroupsTable', () => {
   it('shows loading state', () => {
     render(<GroupsTable groups={[]} loading={true} />)
     
-    // Should show skeleton loading rows
-    const skeletonRows = screen.getAllByRole('row')
-    expect(skeletonRows).toHaveLength(4) // Header + 3 skeleton rows
+    // Should show loading spinner and message
+    expect(screen.getByText('LOADING DATA...')).toBeInTheDocument()
   })
 
   it('shows empty state when no groups', () => {
     render(<GroupsTable groups={[]} />)
     
-    expect(screen.getByText('No groups found. Create your first group to get started.')).toBeInTheDocument()
+    expect(screen.getByText('NO GROUPS FOUND')).toBeInTheDocument()
   })
 
   it('shows empty search results', async () => {
     render(<GroupsTable groups={mockGroups} />)
     
-    const searchInput = screen.getByPlaceholderText('Search groups...')
+    const searchInput = screen.getByPlaceholderText('SEARCH GROUPS...')
     fireEvent.change(searchInput, { target: { value: 'nonexistent' } })
     
     await waitFor(() => {
-      expect(screen.getByText('No groups found matching "nonexistent"')).toBeInTheDocument()
+      expect(screen.getByText('NO GROUPS MATCH YOUR SEARCH CRITERIA')).toBeInTheDocument()
     })
   })
 })

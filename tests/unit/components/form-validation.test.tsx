@@ -84,11 +84,12 @@ describe('Form Validation', () => {
         const validData = {
           name: 'test-service',
           type: 'web' as const,
-          ip_addresses: ['192.168.1.1'],
-          ports: [80, 443],
-          vlan_id: 100,
+          ipAddress: '192.168.1.1',
+          internalPorts: [80],
+          externalPorts: [443],
+          vlan: 100,
           domain: 'example.com',
-          group_id: '123e4567-e89b-12d3-a456-426614174000' // Valid UUID format
+          groupId: '123e4567-e89b-12d3-a456-426614174000' // Valid UUID format
         }
 
         const result = createServiceSchema.safeParse(validData)
@@ -102,9 +103,10 @@ describe('Form Validation', () => {
         const invalidData = {
           name: 'test-service',
           type: 'web' as const,
-          ip_addresses: ['999.999.999.999'],
-          ports: [80],
-          group_id: 'group-1'
+          ipAddress: '999.999.999.999',
+          internalPorts: [80],
+          externalPorts: [80],
+          groupId: '123e4567-e89b-12d3-a456-426614174000'
         }
 
         const result = createServiceSchema.safeParse(invalidData)
@@ -118,9 +120,10 @@ describe('Form Validation', () => {
         const invalidData = {
           name: 'test-service',
           type: 'web' as const,
-          ip_addresses: ['192.168.1.1'],
-          ports: [99999],
-          group_id: 'group-1'
+          ipAddress: '192.168.1.1',
+          internalPorts: [99999],
+          externalPorts: [80],
+          groupId: '123e4567-e89b-12d3-a456-426614174000'
         }
 
         const result = createServiceSchema.safeParse(invalidData)
@@ -134,10 +137,11 @@ describe('Form Validation', () => {
         const invalidData = {
           name: 'test-service',
           type: 'web' as const,
-          ip_addresses: ['192.168.1.1'],
-          ports: [80],
-          vlan_id: 5000,
-          group_id: 'group-1'
+          ipAddress: '192.168.1.1',
+          internalPorts: [80],
+          externalPorts: [80],
+          vlan: 5000,
+          groupId: '123e4567-e89b-12d3-a456-426614174000'
         }
 
         const result = createServiceSchema.safeParse(invalidData)
