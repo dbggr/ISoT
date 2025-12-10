@@ -22,26 +22,20 @@ describe('API Client Integration Tests', () => {
       id: 'service-1',
       name: 'Test Service',
       type: 'web',
-      ip_addresses: ['192.168.1.1'],
-      ports: [80, 443],
-      vlan_id: 100,
+      ipAddress: '192.168.1.1',
+      internalPorts: [8080],
+      externalPorts: [80, 443],
+      vlan: 'vlan-100',
       domain: 'test.example.com',
-      group_id: 'group-1',
-      created_at: '2024-01-01T00:00:00Z',
-      updated_at: '2024-01-01T00:00:00Z'
+      groupId: 'group-1',
+      tags: ['web', 'frontend'],
+      createdAt: '2024-01-01T00:00:00Z',
+      updatedAt: '2024-01-01T00:00:00Z'
     }
 
     describe('getServices', () => {
       it('should fetch services successfully', async () => {
-        const mockResponse = {
-          data: [mockService],
-          pagination: {
-            page: 1,
-            limit: 10,
-            total: 1,
-            totalPages: 1
-          }
-        }
+        const mockResponse = [mockService]
 
         mockFetch.mockResolvedValueOnce({
           ok: true,
@@ -51,7 +45,7 @@ describe('API Client Integration Tests', () => {
 
         const result = await apiClient.getServices()
 
-        expect(mockFetch).toHaveBeenCalledWith('/api/services', {
+        expect(mockFetch).toHaveBeenCalledWith('http://localhost:3000/api/services', {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
@@ -62,7 +56,7 @@ describe('API Client Integration Tests', () => {
       })
 
       it('should handle query parameters', async () => {
-        const mockResponse = { data: [], pagination: { page: 1, limit: 10, total: 0, totalPages: 0 } }
+        const mockResponse = []
         
         mockFetch.mockResolvedValueOnce({
           ok: true,
@@ -74,7 +68,7 @@ describe('API Client Integration Tests', () => {
         await apiClient.getServices(params)
 
         expect(mockFetch).toHaveBeenCalledWith(
-          '/api/services?page=2&limit=20&search=test&type=web',
+          'http://localhost:3000/api/services?page=2&limit=20&search=test&type=web',
           expect.any(Object)
         )
       })
@@ -101,12 +95,12 @@ describe('API Client Integration Tests', () => {
         mockFetch.mockResolvedValueOnce({
           ok: true,
           status: 200,
-          json: async () => ({ data: mockService }),
+          json: async () => mockService,
         } as Response)
 
         const result = await apiClient.getService('service-1')
 
-        expect(mockFetch).toHaveBeenCalledWith('/api/services/service-1', expect.any(Object))
+        expect(mockFetch).toHaveBeenCalledWith('http://localhost:3000/api/services/service-1', expect.any(Object))
         expect(result).toEqual(mockService)
       })
 
@@ -126,20 +120,21 @@ describe('API Client Integration Tests', () => {
         const createData: CreateServiceData = {
           name: 'New Service',
           type: 'web',
-          ip_addresses: ['192.168.1.2'],
-          ports: [80],
-          group_id: 'group-1'
+          ipAddress: '192.168.1.2',
+          internalPorts: [8080],
+          externalPorts: [80],
+          groupId: 'group-1'
         }
 
         mockFetch.mockResolvedValueOnce({
           ok: true,
           status: 201,
-          json: async () => ({ data: { ...mockService, ...createData } }),
+          json: async () => ({ ...mockService, ...createData }),
         } as Response)
 
         const result = await apiClient.createService(createData)
 
-        expect(mockFetch).toHaveBeenCalledWith('/api/services', {
+        expect(mockFetch).toHaveBeenCalledWith('http://localhost:3000/api/services', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -174,12 +169,12 @@ describe('API Client Integration Tests', () => {
         mockFetch.mockResolvedValueOnce({
           ok: true,
           status: 200,
-          json: async () => ({ data: updatedService }),
+          json: async () => updatedService,
         } as Response)
 
         const result = await apiClient.updateService('service-1', updateData)
 
-        expect(mockFetch).toHaveBeenCalledWith('/api/services/service-1', {
+        expect(mockFetch).toHaveBeenCalledWith('http://localhost:3000/api/services/service-1', {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
@@ -201,7 +196,7 @@ describe('API Client Integration Tests', () => {
 
         await apiClient.deleteService('service-1')
 
-        expect(mockFetch).toHaveBeenCalledWith('/api/services/service-1', {
+        expect(mockFetch).toHaveBeenCalledWith('http://localhost:3000/api/services/service-1', {
           method: 'DELETE',
           headers: {
             'Content-Type': 'application/json',
@@ -217,8 +212,8 @@ describe('API Client Integration Tests', () => {
       id: 'group-1',
       name: 'Test Group',
       description: 'Test group description',
-      created_at: '2024-01-01T00:00:00Z',
-      updated_at: '2024-01-01T00:00:00Z'
+      createdAt: '2024-01-01T00:00:00Z',
+      updatedAt: '2024-01-01T00:00:00Z'
     }
 
     describe('getGroups', () => {
@@ -226,12 +221,12 @@ describe('API Client Integration Tests', () => {
         mockFetch.mockResolvedValueOnce({
           ok: true,
           status: 200,
-          json: async () => ({ data: [mockGroup] }),
+          json: async () => [mockGroup],
         } as Response)
 
         const result = await apiClient.getGroups()
 
-        expect(mockFetch).toHaveBeenCalledWith('/api/groups', expect.any(Object))
+        expect(mockFetch).toHaveBeenCalledWith('http://localhost:3000/api/groups', expect.any(Object))
         expect(result).toEqual([mockGroup])
       })
     })
@@ -246,12 +241,12 @@ describe('API Client Integration Tests', () => {
         mockFetch.mockResolvedValueOnce({
           ok: true,
           status: 201,
-          json: async () => ({ data: { ...mockGroup, ...createData } }),
+          json: async () => ({ ...mockGroup, ...createData }),
         } as Response)
 
         const result = await apiClient.createGroup(createData)
 
-        expect(mockFetch).toHaveBeenCalledWith('/api/groups', {
+        expect(mockFetch).toHaveBeenCalledWith('http://localhost:3000/api/groups', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -284,7 +279,7 @@ describe('API Client Integration Tests', () => {
         .mockResolvedValueOnce({
           ok: true,
           status: 200,
-          json: async () => ({ data: [] }),
+          json: async () => [],
         } as Response)
 
       const result = await retryClient.getServices()

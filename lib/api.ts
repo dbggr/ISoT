@@ -84,58 +84,14 @@ export class ApiClient {
       },
     }
 
-    // Add timeout signal if available (browser environment)
-    if (typeof AbortSignal !== 'undefined' && 'timeout' in AbortSignal) {
-      requestOptions.signal = AbortSignal.timeout(this.timeout)
-    } else {
-      // Fallback for environments without AbortSignal.timeout
-      const controller = new AbortController()
-      const timeoutId = setTimeout(() => controller.abort(), this.timeout)
-      requestOptions.signal = controller.signal
-      
-      // Clean up timeout after request completes
-      const originalFetch = fetch
-      const wrappedFetch = async (url: string, options?: RequestInit) => {
-        try {
-          const response = await originalFetch(url, options)
-          clearTimeout(timeoutId)
-          return response
-        } catch (error) {
-          clearTimeout(timeoutId)
-          throw error
-        }
-      }
-      
-      // Use wrapped fetch for this request
-      const response = await wrappedFetch(url.toString(), requestOptions)
-      
-      if (!response.ok) {
-        const errorData: ApiErrorResponse = await response.json().catch(() => ({
-          error: 'Unknown error',
-          message: `HTTP ${response.status}: ${response.statusText}`,
-          status: response.status
-        }))
-        
-        throw new ApiClientError({
-          message: errorData.message || errorData.error,
-          status: response.status,
-          code: errorData.error,
-          details: errorData.details
-        })
-      }
-
-      // Handle empty responses (like DELETE)
-      if (response.status === 204 || response.headers.get('content-length') === '0') {
-        return {} as T
-      }
-
-      const result = await response.json()
-      return result as T
-    }
-
     if (data && (method === 'POST' || method === 'PUT')) {
       requestOptions.body = JSON.stringify(data)
     }
+
+    // Add timeout signal
+    const controller = new AbortController()
+    const timeoutId = setTimeout(() => controller.abort(), this.timeout)
+    requestOptions.signal = controller.signal
 
     let lastError: Error | null = null
     
@@ -143,6 +99,7 @@ export class ApiClient {
     for (let attempt = 0; attempt <= this.retries; attempt++) {
       try {
         const response = await fetch(url.toString(), requestOptions)
+        clearTimeout(timeoutId)
         
         if (!response.ok) {
           const errorData: ApiErrorResponse = await response.json().catch(() => ({
@@ -168,6 +125,7 @@ export class ApiClient {
         return result as T
         
       } catch (error) {
+        clearTimeout(timeoutId)
         lastError = error as Error
         
         // Don't retry on client errors (4xx) or AbortError

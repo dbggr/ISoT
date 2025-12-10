@@ -58,6 +58,9 @@ export function useServices(params?: QueryParams & ServiceFilters): UseServicesS
 
   // Use ref to track if component is mounted to prevent state updates after unmount
   const isMountedRef = useRef(true)
+  
+  // Serialize params to avoid infinite re-renders when params object changes reference
+  const paramsString = JSON.stringify(params || {})
 
   const fetchServices = useCallback(async () => {
     if (!isMountedRef.current) return
@@ -73,29 +76,36 @@ export function useServices(params?: QueryParams & ServiceFilters): UseServicesS
       )
       
       if (isMountedRef.current) {
-        setData(services)
+        setData(services || [])
         
         // Update pagination based on params and response
         setPagination(prev => ({
           page: params?.page || 1,
           limit: params?.limit || 10,
-          total: services.length, // This would come from API response in real implementation
-          totalPages: Math.ceil(services.length / (params?.limit || 10))
+          total: services?.length || 0, // This would come from API response in real implementation
+          totalPages: Math.ceil((services?.length || 0) / (params?.limit || 10))
         }))
       }
     } catch (err) {
       if (isMountedRef.current) {
         setError(getErrorMessage(err))
         setData([])
+        setPagination({
+          page: 1,
+          limit: 10,
+          total: 0,
+          totalPages: 0
+        })
       }
     } finally {
       if (isMountedRef.current) {
         setLoading(false)
       }
     }
-  }, [params])
+  }, [paramsString]) // Use serialized params instead of params object
 
   useEffect(() => {
+    isMountedRef.current = true
     fetchServices()
     
     // Cleanup function to prevent state updates after unmount
@@ -103,11 +113,6 @@ export function useServices(params?: QueryParams & ServiceFilters): UseServicesS
       isMountedRef.current = false
     }
   }, [fetchServices])
-
-  // Reset mounted ref when component mounts
-  useEffect(() => {
-    isMountedRef.current = true
-  }, [])
 
   return {
     data,
@@ -161,16 +166,13 @@ export function useService(id: string): UseServiceState {
   }, [id])
 
   useEffect(() => {
+    isMountedRef.current = true
     fetchService()
     
     return () => {
       isMountedRef.current = false
     }
   }, [fetchService])
-
-  useEffect(() => {
-    isMountedRef.current = true
-  }, [])
 
   return {
     service,

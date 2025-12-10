@@ -79,16 +79,13 @@ export function useGroups(): UseGroupsState {
   }, [])
 
   useEffect(() => {
+    isMountedRef.current = true
     fetchGroups()
     
     return () => {
       isMountedRef.current = false
     }
   }, [fetchGroups])
-
-  useEffect(() => {
-    isMountedRef.current = true
-  }, [])
 
   return {
     data,
@@ -141,16 +138,13 @@ export function useGroup(id: string): UseGroupState {
   }, [id])
 
   useEffect(() => {
+    isMountedRef.current = true
     fetchGroup()
     
     return () => {
       isMountedRef.current = false
     }
   }, [fetchGroup])
-
-  useEffect(() => {
-    isMountedRef.current = true
-  }, [])
 
   return {
     group,
@@ -194,16 +188,13 @@ export function useGroupServices(groupId: string): UseGroupServicesState {
   }, [groupId])
 
   useEffect(() => {
+    isMountedRef.current = true
     fetchGroupServices()
     
     return () => {
       isMountedRef.current = false
     }
   }, [fetchGroupServices])
-
-  useEffect(() => {
-    isMountedRef.current = true
-  }, [])
 
   return {
     services,
