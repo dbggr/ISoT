@@ -1,15 +1,15 @@
 # Infrastructure Source of Truth (ISoT)
 
-A centralized Infrastructure Source of Truth system for managing and tracking network infrastructure information, specifically designed for Infrastructure as Code (IaaC) environments.
+A centralised Infrastructure Source of Truth system for managing and tracking network infrastructure information, specifically designed for Infrastructure as Code (IaaC) environments.
 
 ## Overview
 
 The Network Source of Truth provides a comprehensive API-first solution for managing network resources, services, and their relationships. This system serves as the single source of truth for network infrastructure data, enabling teams to maintain accurate, up-to-date information about their network topology, services, and configurations.
-~~~~
+
 ## Features
 
 ### Core Functionality
-- **Service Management**: Track network services with detailed metadata including ports, VLANs, IP addresses, and domains
+- **Service Management**: Track network services with detailed metadata, including ports, VLANs, IP addresses, and domains
 - **Group Organization**: Organize services into logical groups (storage, security, data_services, etc.)
 - **Comprehensive Metadata**: Store internal/external ports, VLAN information, CIDR blocks, IP addresses, and custom tags
 - **RESTful API**: Full CRUD operations with filtering and search capabilities
@@ -19,7 +19,7 @@ The Network Source of Truth provides a comprehensive API-first solution for mana
 - **Next.js API**: Modern, performant API built with Next.js 15
 - **SQLite Database**: Lightweight, file-based database perfect for development and small-to-medium deployments
 - **TypeScript**: Full type safety throughout the application
-- **Microservice Architecture**: Organized folder structure supporting microservice patterns
+- **Microservice Architecture**: Organised folder structure supporting microservice patterns
 - **Comprehensive Testing**: Unit and integration tests for all components
 
 ## Architecture
@@ -40,7 +40,7 @@ api/
 ## Data Model
 
 ### Groups
-Logical organization units for network services:
+Logical organisation units for network services:
 - `storage` - Storage and data persistence services
 - `security` - Security and authentication services  
 - `data_services` - Data processing and analytics services
@@ -94,7 +94,7 @@ cd network-source-truth
 # Install dependencies
 npm install
 
-# Initialize the database
+# Initialise the database
 npm run db:init
 
 # Start development server
@@ -107,7 +107,7 @@ npm run dev          # Start development server
 npm run build        # Build for production
 npm run test         # Run test suite
 npm run test:watch   # Run tests in watch mode
-npm run db:init      # Initialize database with schema
+npm run db:init      # Initialise database with schema
 npm run db:seed      # Seed database with default data
 ```
 
@@ -181,4 +181,4 @@ All specifications are maintained in the `.kiro/specs/network-source-truth/` dir
 
 **Status**: In Development  
 **Phase**: API Implementation  
-**Next**: Task execution from implementation plan
+**Next**: Task execution from the implementation plan
